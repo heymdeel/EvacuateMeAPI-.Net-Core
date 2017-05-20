@@ -109,8 +109,6 @@ namespace EvacuateMe.DAL.Repostitories
             db.SaveChanges();
         }
 
-        private bool disposed = false;
-
         public virtual void Dispose(bool disposing)
         {
             if (!this.disposed)
@@ -122,6 +120,8 @@ namespace EvacuateMe.DAL.Repostitories
                 this.disposed = true;
             }
         }
+
+        private bool disposed = false;
 
         public void Dispose()
         {

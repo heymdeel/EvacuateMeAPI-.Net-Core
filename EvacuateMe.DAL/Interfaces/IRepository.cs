@@ -11,14 +11,16 @@ namespace EvacuateMe.DAL.Interfaces
         void Create(TEntity item);
         TEntity FindById(int id);
         IEnumerable<TEntity> Get();
-        IEnumerable<TEntity> Get(Func<TEntity, bool> predicate);
-        TEntity FirstOrDefault(Func<TEntity, bool> predicate);
         void Remove(TEntity item);
         void Update(TEntity item);
 
+        IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> predicate);
+
+        TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
+
         IEnumerable<TEntity> GetWithInclude(params Expression<Func<TEntity, object>>[] includeProperties);
 
-        IEnumerable<TEntity> GetWithInclude(Func<TEntity, bool> predicate,
+        IEnumerable<TEntity> GetWithInclude(Expression<Func<TEntity, bool>> predicate,
             params Expression<Func<TEntity, object>>[] includeProperties);
     }
 }

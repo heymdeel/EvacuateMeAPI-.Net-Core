@@ -36,27 +36,20 @@ namespace EvacuateMe.DAL.Repostitories
             return _dbSet.AsNoTracking().ToList();
         }
 
-        public IEnumerable<TEntity> Get(Func<TEntity, bool> predicate)
+        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> predicate)
         {
             return _dbSet.AsNoTracking().Where(predicate).ToList();
         }
 
-        public TEntity FirstOrDefault(Func<TEntity, bool> predicate)
+        public TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
         {
-            var matching = _dbSet.AsNoTracking().Where(predicate).ToList();
-            if (matching.Count == 0)
-            {
-                return null;
-            }
-
-            return matching.First();
+            return _dbSet.FirstOrDefault(predicate);
         }
 
         public void Remove(TEntity item)
         {
             _dbSet.Remove(item);
             _context.SaveChanges();
-         
         }
 
         public void Update(TEntity item)
@@ -70,7 +63,7 @@ namespace EvacuateMe.DAL.Repostitories
             return Include(includeProperties).ToList();
         }
 
-        public IEnumerable<TEntity> GetWithInclude(Func<TEntity, bool> predicate,
+        public IEnumerable<TEntity> GetWithInclude(Expression<Func<TEntity, bool>> predicate,
             params Expression<Func<TEntity, object>>[] includeProperties)
         {
             var query = Include(includeProperties);

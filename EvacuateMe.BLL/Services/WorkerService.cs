@@ -79,11 +79,6 @@ namespace EvacuateMe.BLL.Services
             return false;
         }
 
-        public void Dispose()
-        {
-            db.Dispose();
-        }
-
         public bool ChangeLocation(Worker worker, Location newLocation)
         {
             if (worker.StatusId == (int)WorkerStatusEnum.Offline)
@@ -142,6 +137,11 @@ namespace EvacuateMe.BLL.Services
                                                         order.StartWorkerLat, order.StartWorkerLong);
 
             return orderInfo;
+        }
+
+        public void Dispose()
+        {
+            db.Dispose();
         }
     }
 }

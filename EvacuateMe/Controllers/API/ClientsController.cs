@@ -7,6 +7,7 @@ using EvacuateMe.Filters;
 using EvacuateMe.BLL.Interfaces;
 using EvacuateMe.BLL.DTO;
 using EvacuateMe.BLL.BuisnessModels;
+using System.Threading;
 
 namespace EvacuateMe.Controllers.API
 {

@@ -25,8 +25,8 @@ namespace EvacuateMe.BLL.Services
 
         public bool ClientExists(string phone)
         {
-            var matchingClients = db.Clients.Get(c => c.Phone == phone);
-            return (matchingClients.Count() != 0);
+            var clients = db.Clients.Get(c => c.Phone == phone);
+            return (clients.Count() != 0);
         }
 
         public bool ValidatePhone(string phone)
@@ -45,8 +45,6 @@ namespace EvacuateMe.BLL.Services
                 return null;
             }
 
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine($"name == {client.Name}, phone == {client.Phone}, code == {code}");
             db.SMSCodes.Remove(sms);
             var apiKey = encrypt.GenerateHash(client.Phone, code.ToString());
             client.ApiKey = apiKey;

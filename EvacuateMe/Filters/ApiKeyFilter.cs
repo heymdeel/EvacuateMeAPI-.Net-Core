@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace EvacuateMe.Filters
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public class RequireApiKeyFilter : Attribute, IActionFilter
     {
         public void OnActionExecuted(ActionExecutedContext context) {}
