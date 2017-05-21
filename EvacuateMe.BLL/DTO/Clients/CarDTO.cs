@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace EvacuateMe.BLL.BuisnessModels
+namespace EvacuateMe.BLL.DTO.Clients
 {
-    public class Car
+    public class CarDTO
     {
         [Required, StringLength(50, MinimumLength = 5, ErrorMessage = "Длина модели машины должна быть от 5 до 50 символов")]
         [JsonProperty("car_model")]

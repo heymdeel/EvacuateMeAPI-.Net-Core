@@ -37,7 +37,6 @@ namespace EvacuateMe.BLL.Services
         public async Task<double> GetDistanceAsync(double lat1, double lon1, double lat2, double lon2)
         {
             var result = await MakeRequestAsync(lat1, lon1, lat2, lon2);
-            Console.WriteLine(result["rows"][0]["elements"][0]["distance"]["value"]);
             return result["rows"][0]["elements"][0]["distance"]["value"];
         }
 

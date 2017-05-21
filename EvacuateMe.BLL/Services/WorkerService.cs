@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using EvacuateMe.BLL.DTO;
 using AutoMapper;
 using System.Threading.Tasks;
+using EvacuateMe.BLL.DTO.Workers;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -19,17 +20,17 @@ namespace EvacuateMe.BLL.Services
         private readonly IEncrypt encryptService;
         private readonly IMapService mapService;
 
-        public WorkerService(IUnitOfWork db, IEncrypt encrypt, IMapService mapService)
+        public WorkerService(IUnitOfWork db, IEncrypt encryptService, IMapService mapService)
         {
             this.db = db;
-            this.encryptService = encrypt;
+            this.encryptService = encryptService;
             this.mapService = mapService;
         }
 
         public bool WorkerExists(string phone)
         {
-            var matchingWorkers = db.Workers.Get(c => c.Phone == phone);
-            return (matchingWorkers.Count() != 0);
+            var worker = db.Workers.FirstOrDefault(c => c.Phone == phone);
+            return (worker != null);
         }
 
         public bool ValidatePhone(string phone)
@@ -37,7 +38,7 @@ namespace EvacuateMe.BLL.Services
             return Regex.IsMatch(phone, "^[7-8][0-9]{10}$");
         }
 
-        public Worker SignIn(SmsInfo smsInfo)
+        public Worker SignIn(SmsDTO smsInfo)
         {
             var sms = db.SMSCodes.FirstOrDefault(s => s.Phone == smsInfo.Phone && s.Code == smsInfo.Code);
             var worker = db.Workers.FirstOrDefault(c => c.Phone == smsInfo.Phone);
@@ -79,20 +80,18 @@ namespace EvacuateMe.BLL.Services
             return false;
         }
 
-        public bool ChangeLocation(Worker worker, Location newLocation)
+        public bool ChangeLocation(Worker worker, LocationDTO newLocation)
         {
             if (worker.StatusId == (int)WorkerStatusEnum.Offline)
             {
                 return false;
             }
 
-            db.WorkersLocationHistory.Create(new WorkerLocationHistory()
-            {
-                Latitude = newLocation.Latitude,
-                Longitude = newLocation.Longitude,
-                TimeStamp = DateTime.Now,
-                WorkerId = worker.Id
-            });
+            var locationHistory = Mapper.Map<LocationDTO, WorkerLocationHistory>(newLocation);
+            locationHistory.TimeStamp = DateTime.Now;
+            locationHistory.WorkerId = worker.Id;
+
+            db.WorkersLocationHistory.Create(locationHistory);
 
             var lastLocation = db.WorkersLastLocation.FindById(worker.Id);
             if (lastLocation == null)
@@ -114,27 +113,21 @@ namespace EvacuateMe.BLL.Services
             return true;
         }
 
-        public IEnumerable<LocationHistoryDTO> GetLocationHistory(Worker worker)
+        public OrderClientDTO CheckForOrders(Worker worker)
         {
-            return null;
-        }
-
-        public async Task<OrderInfoDTO> CheckForOrdersAsync(Worker worker)
-        {
-            var orders = db.Orders.GetWithInclude(o => o.WorkerId == worker.Id
+            var order = db.Orders.FirstOrDefaultWithInclude(o => o.WorkerId == worker.Id
                         && o.StatusId == (int)OrderStatusEnum.Awaiting,
                         c => c.Client);
 
-            if (orders.Count() == 0)
+            if (order == null)
             {
                 return null;
             }
 
-            var order = orders.First();
-            var orderInfo = Mapper.Map<Order, OrderInfoDTO>(order);
+            var orderInfo = Mapper.Map<Order, OrderClientDTO>(order);
             orderInfo.ClientPhone = order.Client.Phone;
-            orderInfo.Distance = await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong, 
-                                                        order.StartWorkerLat, order.StartWorkerLong);
+            orderInfo.Distance = Task.Run(async () => await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong, 
+                                                        order.StartWorkerLat, order.StartWorkerLong)).Result;
 
             return orderInfo;
         }

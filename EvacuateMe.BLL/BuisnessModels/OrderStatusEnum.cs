@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EvacuateMe.BLL.BuisnessModels
 {
-    public enum OrderStatusEnum
+    internal enum OrderStatusEnum
     {
         Awaiting = 0,
         OnTheWay = 1,

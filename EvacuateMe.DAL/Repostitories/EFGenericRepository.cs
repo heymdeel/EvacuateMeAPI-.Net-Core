@@ -76,5 +76,12 @@ namespace EvacuateMe.DAL.Repostitories
             return includeProperties
                 .Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
         }
+
+        public TEntity FirstOrDefaultWithInclude(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includeProperties)
+        {
+            var query = Include(includeProperties);
+
+            return query.FirstOrDefault(predicate);
+        }
     }
 }

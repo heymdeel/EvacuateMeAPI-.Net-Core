@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using EvacuateMe.Filters;
 using EvacuateMe.BLL.Interfaces;
-using EvacuateMe.BLL.BuisnessModels;
+using EvacuateMe.BLL.DTO;
+using EvacuateMe.BLL.DTO.Workers;
 
 namespace EvacuateMe.Controllers.API
 {
@@ -39,7 +40,7 @@ namespace EvacuateMe.Controllers.API
 
         // POST api/workers/login
         [HttpPost, Route("login")]
-        public async Task<IActionResult> SignIn([FromBody]SmsInfo sms)
+        public async Task<IActionResult> SignIn([FromBody]SmsDTO sms)
         {
             if (sms == null || !TryValidateModel(sms))
             {
@@ -77,7 +78,7 @@ namespace EvacuateMe.Controllers.API
         // PUT api/workers/location
         [HttpPut, Route("location")]
         [RequireApiKeyFilter]
-        public async Task<IActionResult> ChangeLocation([FromHeader(Name = "api_key")]string apiKey, [FromBody]Location newLocation)
+        public async Task<IActionResult> ChangeLocation([FromHeader(Name = "api_key")]string apiKey, [FromBody]LocationDTO newLocation)
         {
             var worker = workerService.GetByApiKey(apiKey);
             if (worker == null)
@@ -109,7 +110,7 @@ namespace EvacuateMe.Controllers.API
                 return Unauthorized();
             }
 
-            var orderInfo = await workerService.CheckForOrdersAsync(worker);
+            var orderInfo = workerService.CheckForOrders(worker);
             if (orderInfo != null)
             {
                 return Json(orderInfo);

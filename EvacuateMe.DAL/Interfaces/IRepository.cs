@@ -17,6 +17,8 @@ namespace EvacuateMe.DAL.Interfaces
         IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> predicate);
 
         TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
+        TEntity FirstOrDefaultWithInclude(Expression<Func<TEntity, bool>> predicate,
+            params Expression<Func<TEntity, object>>[] includeProperties);
 
         IEnumerable<TEntity> GetWithInclude(params Expression<Func<TEntity, object>>[] includeProperties);
 

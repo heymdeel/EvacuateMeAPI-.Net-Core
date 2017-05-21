@@ -46,6 +46,7 @@ namespace EvacuateMe
             services.AddTransient<IWorkerService, WorkerService>();
 
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
+            services.AddTransient<IOrderService, OrderService>();
 
             // Add framework services.
             services.AddMvc();

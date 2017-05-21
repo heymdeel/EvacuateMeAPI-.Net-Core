@@ -9,6 +9,7 @@ using EvacuateMe.DAL.Entities;
 using System.Text.RegularExpressions;
 using System.Linq;
 using EvacuateMe.BLL.BuisnessModels;
+using EvacuateMe.BLL.DTO.Clients;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -25,8 +26,8 @@ namespace EvacuateMe.BLL.Services
 
         public bool ClientExists(string phone)
         {
-            var clients = db.Clients.Get(c => c.Phone == phone);
-            return (clients.Count() != 0);
+            var client = db.Clients.FirstOrDefault(c => c.Phone == phone);
+            return (client != null);
         }
 
         public bool ValidatePhone(string phone)
@@ -53,7 +54,7 @@ namespace EvacuateMe.BLL.Services
             return apiKey;
         }
 
-        public Client SignIn(SmsInfo smsInfo)
+        public Client SignIn(SmsDTO smsInfo)
         {
             var sms = db.SMSCodes.FirstOrDefault(s => s.Phone == smsInfo.Phone && s.Code == smsInfo.Code);
             var client = db.Clients.FirstOrDefault(c => c.Phone == smsInfo.Phone);
@@ -74,11 +75,18 @@ namespace EvacuateMe.BLL.Services
             return db.Clients.FirstOrDefault(c => c.ApiKey == apiKey);
         }
 
-        public void ChangeCar(Client client, Car newCar)
+        public void ChangeCar(Client client, CarDTO newCar)
         {
             client.CarColour = newCar.Colour;
             client.CarModel = newCar.Model;
             db.Clients.Update(client);
+        }
+
+        public IEnumerable<CarType> GetCarTypes()
+        {
+            var carTypes = db.CarTypes.Get();
+            
+            return carTypes.ToList().Count == 0 ? null : carTypes; 
         }
 
         public void Dispose()

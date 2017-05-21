@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EvacuateMe.BLL.BuisnessModels
 {
-    public enum WorkerStatusEnum
+    internal enum WorkerStatusEnum
     {
         Offline = 0,
         Working = 1,

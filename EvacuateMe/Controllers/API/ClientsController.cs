@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using EvacuateMe.Filters;
 using EvacuateMe.BLL.Interfaces;
 using EvacuateMe.BLL.DTO;
-using EvacuateMe.BLL.BuisnessModels;
 using System.Threading;
+using EvacuateMe.BLL.DTO.Clients;
 
 namespace EvacuateMe.Controllers.API
 {
@@ -64,7 +64,7 @@ namespace EvacuateMe.Controllers.API
 
         // POST api/clients/login
         [HttpPost, Route("login")]
-        public async Task<IActionResult> SignIn([FromBody]SmsInfo sms)
+        public async Task<IActionResult> SignIn([FromBody]SmsDTO sms)
         {
             if (sms == null || !TryValidateModel(sms))
             {
@@ -88,7 +88,7 @@ namespace EvacuateMe.Controllers.API
         // PUT api/clients/car
         [HttpPut, Route("car")]
         [RequireApiKeyFilter]
-        public async Task<IActionResult> ChangeCar([FromBody]Car car, [FromHeader(Name = "api_key")]string apiKey)
+        public async Task<IActionResult> ChangeCar([FromBody]CarDTO car, [FromHeader(Name = "api_key")]string apiKey)
         {
             var client = clientService.GetByApiKey(apiKey);
             if (client == null)

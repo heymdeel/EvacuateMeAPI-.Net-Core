@@ -1,186 +1,241 @@
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
-//using EvacuateMe.Filters;
-//using Microsoft.EntityFrameworkCore;
-//using Newtonsoft.Json.Linq;
-//using EvacuateMe.Models;
-//using EvacuateMe.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using EvacuateMe.Filters;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using EvacuateMe.BLL.DTO;
+using EvacuateMe.BLL.DTO.Orders;
+using EvacuateMe.BLL.Interfaces;
+using EvacuateMe.DAL.Entities;
 
-//namespace EvacuateMe.Controllers.API
-//{
-//    [Produces("application/json")]
-//    [Route("api/orders")]
-//    public class OrdersController : Controller
-//    {
-//        private readonly DataContext db;
-//        private readonly IMapService map;
+namespace EvacuateMe.Controllers.API
+{
+    [Produces("application/json")]
+    [Route("api/orders")]
+    public class OrdersController : Controller
+    {
+        private readonly IClientService clientService;
+        private readonly IOrderService orderService;
+        private readonly IWorkerService workerService;
 
-//        public OrdersController(DataContext context, IMapService mapService)
-//        {
-//            db = context;
-//            map = mapService;
-//        }
+        public OrdersController(IClientService clientService, IOrderService orderService, IWorkerService workerService)
+        {
+            this.clientService = clientService;
+            this.orderService = orderService;
+            this.workerService = workerService;
+        }
 
-//        // POST api/orders
-//        [HttpPost]
-//        [RequireApiKeyFilter]
-//        public async Task<IActionResult> Create([FromHeader(Name = "api_key")]string apiKey, [FromBody]JObject json)
-//        {
-//            var client = await db.Clients.FirstOrDefaultAsync(c => c.ApiKey == apiKey);
-//            if (client == null)
-//            {
-//                return Unauthorized();
-//            }
+        // POST api/orders
+        [HttpPost]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> Create([FromHeader(Name = "api_key")]string apiKey, [FromBody]OrderCreateDTO orderInfo)
+        {
+            var client = clientService.GetByApiKey(apiKey);
+            if (client == null)
+            {
+                return Unauthorized();
+            }
 
-//            var order = json.ToObject<Order>();
-//            if (!TryValidateModel(order))
-//            {
-//                return BadRequest(ModelState);
-//            }
+            if (orderInfo == null || !TryValidateModel(orderInfo))
+            {
+                return BadRequest(ModelState);
+            }
 
-//            var company = await db.Companies.FindAsync(json["company_id"].Value<int>());
-//            var worker = await db.Workers.FindAsync(json["worker_id"].Value<int>());
+            var response = orderService.CreateOrder(client, orderInfo);
 
-//            if (!await client.MakeOrderAsync(company, worker, order, db))
-//            {
-//                return BadRequest();
-//            }
+            if (response == null)
+            {
+                return NotFound();
+            }
 
-//            var response = new
-//            {
-//                order_id = order.Id,
-//                name = worker.Name,
-//                latitude = order.StartWorkerLat,
-//                longitude = order.StartWorkerLong,
-//                phone = worker.Phone
-//            };
+            return Created("", response);
+        }
 
-//            return Created("", response);
-//        }
+        // GET api/orders/{idOrder}/worker/location
+        [HttpGet, Route("{orderId:int}/worker/location")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> CurrentLocation([FromHeader(Name = "api_key")]string apiKey, int orderId)
+        {
+            var client = clientService.GetByApiKey(apiKey);
+            if (client == null)
+            {
+                return Unauthorized();
+            }
 
-//        // GET api/orders/{idOrder}/worker/location
-//        [HttpGet, Route("{orderId:int}/worker/location")]
-//        [RequireApiKeyFilter]
-//        public async Task<IActionResult> CurrentLocation([FromHeader(Name = "api_key")]string apiKey, int orderId)
-//        {
-//            if (!db.Clients.Any(c => c.ApiKey == apiKey))
-//            {
-//                return Unauthorized();
-//            }
+            if (!orderService.ClientInOrder(orderId, client))
+            {
+                return StatusCode(403);
+            }
 
-//            var order = await db.Orders.FindAsync(orderId);
-//            if (order == null)
-//            {
-//                return NotFound();
-//            }
+            var response = orderService.GetWorkerLocation(orderId);
+            if (response == null)
+            {
+                return NotFound();
+            }
 
-//            db.Entry(order).Reference(o => o.Worker).Load();
+            return Json(response);
+        }
 
-//            var location = order.Worker.GetCurrentLocation(db);
-//            if (location == null)
-//            {
-//                return NotFound();
-//            }
+        // PUT api/orders/{id}/status/{status}
+        [HttpPut, Route("{orderId:int}/status/{newStatus:int}")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> ChangeStatus([FromHeader(Name = "api_key")]string apiKey, int orderId, int newStatus)
+        {
+            var client = clientService.GetByApiKey(apiKey);
+            var worker = workerService.GetByApiKey(apiKey);
 
-//            return Json(location);
-//        }
+            if (client == null && worker == null)
+            {
+                return Unauthorized();
+            }
 
-//        // PUT api/orders/{id}/status/{status}
-//        [HttpPut, Route("{orderId:int}/status/{newStatus:int}")]
-//        [RequireApiKeyFilter]
-//        public async Task<IActionResult> ChangeStatus([FromHeader(Name = "api_key")]string apiKey, int orderId, int newStatus)
-//        {
-//            var order = await db.Orders.FindAsync(orderId);
+            bool statusChanged = false;
+            if (worker == null)
+            {
+                if (!orderService.ClientInOrder(orderId, client))
+                {
+                    return StatusCode(403);
+                }
 
-//            var client = await db.Clients.FirstOrDefaultAsync(c => c.ApiKey == apiKey);
-//            var worker = await db.Workers.FirstOrDefaultAsync(w => w.ApiKey == apiKey);
-//            if (client == null && worker == null)
-//            {
-//                return Unauthorized();
-//            }
+                statusChanged = orderService.ChangeStatusByClient(orderId, newStatus);
+            }
+            else
+            {
+                if (!orderService.WorkerInOrder(orderId, worker))
+                {
+                    return StatusCode(403);
+                }
 
-//            if ((order?.ChangeStatus(newStatus, client, map, db)).Value
-//                || (order?.ChangeStatus(newStatus, worker, map, db)).Value)
-//            {
-//                return Ok();
-//            }
+                statusChanged = orderService.ChangeStatusByWorker(orderId, newStatus);
+            }
 
-//            return BadRequest();
-//        }
+            if (statusChanged)
+            {
+                return Ok();
+            }
 
-//        // GET api/orders/{id}/status
-//        [HttpGet, Route("{orderId:int}/status")]
-//        [RequireApiKeyFilter]
-//        public async Task<IActionResult> GetStatus([FromHeader(Name = "api_key")]string apiKey, int orderId)
-//        {
-//            if (!(await db.Workers.FirstOrDefaultAsync(w => w.ApiKey == apiKey) == null
-//                || await db.Clients.FirstOrDefaultAsync(c => c.ApiKey == apiKey) == null))
-//            {
-//                return Unauthorized();
-//            }
-//            var order = await db.Orders.FindAsync(orderId);
-//            if (order == null)
-//            {
-//                return NotFound();
-//            }
+            return BadRequest();
+        }
 
-//            db.Entry(order).Reference(o => o.Status).Load();
-//            return Json(new { id = order.Status.Id, description = order.Status.Description });
-//        }
+        // GET api/orders/{id}/status
+        [HttpGet, Route("{orderId:int}/status")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> GetStatus([FromHeader(Name = "api_key")]string apiKey, int orderId)
+        {
+            var client = clientService.GetByApiKey(apiKey);
+            var worker = workerService.GetByApiKey(apiKey);
+            if (client == null && worker == null)
+            {
+                return Unauthorized();
+            }
 
-//        // PUT api/orders/{id}/rate/{rate}
-//        [HttpPut, Route("{orderId:int}/rate/{rate:int}")]
-//        [RequireApiKeyFilter]
-//        public async Task<IActionResult> Rate([FromHeader(Name = "api_key")]string apiKey, int orderId, int rate)
-//        {
-//            var client = await db.Clients.FirstOrDefaultAsync(c => c.ApiKey == apiKey);
-//            var order = await db.Orders.FindAsync(orderId);
+            if (worker == null && !orderService.ClientInOrder(orderId, client))
+            {
+                return StatusCode(403);
+            }
+            else
+            if (!orderService.WorkerInOrder(orderId, worker))
+            {
+                return StatusCode(403);
+            }
 
-//            if (order == null)
-//            {
-//                return NotFound();
-//            }
+            var status = orderService.GetOrderStatus(orderId);
+            if (status == null)
+            {
+                return NotFound();
+            }
 
-//            if (client != null && client.RateOrder(order, rate, db))
-//            {
-//                return Ok();
-//            }
+            return Json(new { id = status.Id, description = status.Description });
+        }
 
-//            return BadRequest();
-//        }     
+        // PUT api/orders/{id}/rate/{rate}
+        [HttpPut, Route("{orderId:int}/rate/{rate:int}")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> Rate([FromHeader(Name = "api_key")]string apiKey, int orderId, int rate)
+        {
+            var client = clientService.GetByApiKey(apiKey);
 
-//        // GET api/orders/{id}/info
-//        [HttpGet, Route("{orderId:int}/info")]
-//        [RequireApiKeyFilter]
-//        public async Task<IActionResult> GetDetailedInfo([FromHeader(Name = "api_key")]string apiKey, int orderId)
-//        {
-//            var order = await db.Orders.FindAsync(orderId);
-//            if (order == null)
-//            {
-//                return NotFound();
-//            }
+            if (client == null)
+            {
+                return Unauthorized();
+            }
 
-//            var client = await db.Clients.FirstOrDefaultAsync(c => c.ApiKey == apiKey);
-//            var worker = await db.Workers.FirstOrDefaultAsync(w => w.ApiKey == apiKey);
+            if (!orderService.ClientInOrder(orderId, client))
+            {
+                return StatusCode(403);
+            }
 
-//            if (order.CheckUser(client, db) || order.CheckUser(worker, db))
-//            {
-//                db.Entry(order).Reference(o => o.Worker).Load();
-//                db.Entry(order.Worker).Reference(w => w.Company).Load();
-//                return Json(new
-//                {
-//                    distance = order.Distance,
-//                    summary = order.Summary,
-//                    company = order.Worker.Company.Name,
-//                    order_id = order.Id
-//                });
-//            }
+            if (orderService.RateOrder(orderId, rate))
+            {
+                return Ok();
+            }
 
-//            return BadRequest();
-//        }
-//    }
-//}
+            return BadRequest();
+        }
+
+        // GET api/orders/{id}/info
+        [HttpGet, Route("{orderId:int}/info")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> GetDetailedInfo([FromHeader(Name = "api_key")]string apiKey, int orderId)
+        {
+            var client = clientService.GetByApiKey(apiKey);
+            var worker = workerService.GetByApiKey(apiKey);
+            if (client == null && worker == null)
+            {
+                return Unauthorized();
+            }
+
+            if (client != null && !orderService.ClientInOrder(orderId, client))
+            {
+                return StatusCode(403);
+            }
+
+            if (worker != null && !orderService.WorkerInOrder(orderId, worker))
+            {
+                return StatusCode(403);
+            }
+
+            var orderInfo = orderService.GetOrderInfo(orderId); ;
+            if (orderInfo == null)
+            {
+                return NotFound();
+            }
+
+            return Json(orderInfo);
+        }
+
+        // GET api/orders/history
+        [HttpGet, Route("history")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> GetOrdersHistory([FromHeader(Name = "api_key")]string apiKey)
+        {
+            var client = clientService.GetByApiKey(apiKey);
+            var worker = workerService.GetByApiKey(apiKey);
+            if (client == null && worker == null)
+            {
+                return Unauthorized();
+            }
+
+            List<OrderHistoryDTO> history;
+            if (worker == null)
+            {
+                history = orderService.GetClientHistory(client)?.ToList();
+            }
+            else
+            {
+                history = orderService.GetWorkerHistory(worker)?.ToList();
+            }
+
+            if (history == null)
+            {
+                return NotFound();
+            }
+
+            return Json(history);
+        }
+    }
+}

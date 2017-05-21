@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace EvacuateMe.BLL.BuisnessModels
+namespace EvacuateMe.BLL.DTO
 {
-    public class SmsInfo
+    public class SmsDTO
     {
         [Required, RegularExpression("^[7-8][0-9]{10}$")]
         public string Phone { get; set; }

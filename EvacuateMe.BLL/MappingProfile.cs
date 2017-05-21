@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using EvacuateMe.BLL.DTO;
+using EvacuateMe.BLL.DTO.Clients;
+using EvacuateMe.BLL.DTO.Orders;
+using EvacuateMe.BLL.DTO.Workers;
 using EvacuateMe.DAL.Entities;
 using System;
 using System.Collections.Generic;
@@ -15,8 +18,26 @@ namespace EvacuateMe.BLL
             CreateMap<Client, ClientSignUpDTO>();
             CreateMap<ClientSignUpDTO, Client>();
 
-            CreateMap<Order, OrderInfoDTO>();
-            CreateMap<OrderInfoDTO, Order>();
+            CreateMap<Order, OrderClientDTO>();
+            CreateMap<OrderClientDTO, Order>();
+
+            CreateMap<LocationDTO, WorkerLocationHistory>();
+            CreateMap<WorkerLocationHistory, LocationDTO>();
+
+            CreateMap<LocationDTO, WorkerLastLocation>();
+            CreateMap<WorkerLastLocation, LocationDTO>();
+
+            CreateMap<Company, OrderCompanyDTO>();
+            CreateMap<OrderCompanyDTO, Company>();
+
+            CreateMap<Order, OrderCreateDTO>();
+            CreateMap<OrderCreateDTO, Order>();
+
+            CreateMap<Order, CompletedOrderDTO>();
+            CreateMap<CompletedOrderDTO, Order>();
+
+            CreateMap<Order, OrderHistoryDTO>();
+            CreateMap<OrderHistoryDTO, Order>();
         }
     }
 }

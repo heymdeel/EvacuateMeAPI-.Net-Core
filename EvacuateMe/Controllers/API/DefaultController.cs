@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using EvacuateMe.Filters;
 using EvacuateMe.BLL.Interfaces;
+using EvacuateMe.BLL.BuisnessModels;
+using EvacuateMe.BLL.DTO;
+using EvacuateMe.BLL.DTO.Orders;
 
 namespace EvacuateMe.Controllers.API
 {
@@ -14,11 +17,13 @@ namespace EvacuateMe.Controllers.API
     {
         private readonly ISmsSender smsService;
         private readonly IClientService clientService;
+        private readonly IOrderService orderService;
 
-        public DefaultController(ISmsSender smsService, IClientService clientService)
+        public DefaultController(ISmsSender smsService, IClientService clientService, IOrderService orderService)
         {
             this.smsService = smsService;
             this.clientService = clientService;
+            this.orderService = orderService;
         }
 
         // GET: api/code/{phone}
@@ -34,61 +39,47 @@ namespace EvacuateMe.Controllers.API
             return Ok();
         }
 
-        //[HttpGet, Route("car_types")]
-        //[RequireApiKeyFilter]
-        //public async Task<IActionResult> CarTypes([FromHeader(Name = "api_key")]string apiKey)
-        //{
-        //    if (!db.Clients.Any(c => c.ApiKey == apiKey))
-        //    {
-        //        return Unauthorized();
-        //    }
+        [HttpGet, Route("car_types")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> CarTypes([FromHeader(Name = "api_key")]string apiKey)
+        {
+            if (clientService.GetByApiKey(apiKey) == null)
+            {
+                return Unauthorized();
+            }
 
-        //    var carTypes = from t in db.CarTypes
-        //                   select new { id = t.Id, name = t.Name };
+            var carTypes = clientService.GetCarTypes();
+            if (carTypes == null)
+            {
+                return NotFound();
+            }
 
-        //    if (carTypes == null)
-        //    {
-        //        return NotFound();
-        //    }
+            return Json(carTypes);
+        }
 
-        //    return Json(carTypes);
-        //}
+        // POST: api/help/companies
+        [HttpPost, Route("help/companies")]
+        [RequireApiKeyFilter]
+        public async Task<IActionResult> ListOfCompanies([FromHeader(Name = "api_key")]string apiKey, [FromBody]ClientLocationDTO clientInfo)
+        {
+            if (clientService.GetByApiKey(apiKey) == null)
+            {
+                return Unauthorized();
+            }
 
-        //// POST: api/help/companies
-        //[RequireApiKeyFilter]
-        //[HttpPost, Route("help/companies")]
-        //public async Task<IActionResult> ListOfCompanies([FromHeader(Name = "api_key")]string apiKey, [FromBody]JObject json)
-        //{
-        //    var client = await db.Clients.FirstOrDefaultAsync(c => c.ApiKey == apiKey);
-        //    if (client == null)
-        //    {
-        //        return Unauthorized();
-        //    }
+            if (clientInfo == null || !TryValidateModel(clientInfo))
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    int carType = json["car_type"].Value<int>();
-        //    var clientLocation = json.ToObject<Location>();
+            var response = orderService.GetListOfCompanies(clientInfo);
 
-        //    if (!TryValidateModel(clientLocation))
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+            if (response == null)
+            {
+                return NotFound();
+            }
 
-        //    List<CompanyJsonInfo> response = new List<CompanyJsonInfo>();  
-        //    foreach (var company in db.Companies.ToList())
-        //    {
-        //        var companyInfo = await company.GetClosestWorkerAsync(carType, clientLocation, map, db);
-        //        if (companyInfo != null)
-        //        {
-        //            response.Add(companyInfo);
-        //        }
-        //    }
-
-        //    if (response.Count == 0)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return Json(response.OrderBy(c => c.ClosestDistance)); 
-        //}        
+            return Json(response);
+        }
     }
 }
