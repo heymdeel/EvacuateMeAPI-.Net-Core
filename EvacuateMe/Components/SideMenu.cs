@@ -17,11 +17,16 @@ namespace EvacuateMe.Components
                 {"Главная", "/" },
                 {"Компании", "/companies" },
                 {"О нас", "/about" }
-            };
+            };  
         }
 
         public IViewComponentResult Invoke()
-        {
+        { 
+            if (User != null && User.IsInRole("company"))
+            {
+                _categories["Водители"] = "/workers";
+            }
+
             return View(_categories);
         }
     }

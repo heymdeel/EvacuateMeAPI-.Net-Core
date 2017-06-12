@@ -8,7 +8,7 @@
 @if (User.IsInRole("admin"))
 {
     <div>
-        <form asp-action="Add" asp-controller="Company">
+        <form asp-action="Add" asp-controller="Company" method="get">
             <input type="submit" value="Добавить компанию" class="add_company_btn">
         </form>
     </div>

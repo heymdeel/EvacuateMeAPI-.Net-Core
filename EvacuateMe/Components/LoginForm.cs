@@ -9,18 +9,18 @@ namespace EvacuateMe.Components
 {
     public class LoginForm : ViewComponent
     {
-        private readonly IAuthorizationService authorizationService;
+        private readonly ICompanyService companyService;
 
-        public LoginForm(IAuthorizationService authorizationService)
+        public LoginForm(ICompanyService authorizationService)
         {
-            this.authorizationService = authorizationService;
+            this.companyService = authorizationService;
         }
 
         public IViewComponentResult Invoke()
         {
             if (User.IsInRole("company"))
             {
-                ViewData["name"] = authorizationService.GetCompanyName(User.Identity.Name);
+                ViewData["name"] = companyService.GetCompanyName(User.Identity.Name);
             }
             else
             {

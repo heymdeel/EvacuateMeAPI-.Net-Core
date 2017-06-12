@@ -10,5 +10,8 @@ namespace EvacuateMe.BLL.Interfaces
     {
         IEnumerable<CompanyDTO> GetCompanies();
         void AddCommpany(CompanyRegisterDTO company);
+        IEnumerable<WorkerDTO> GetWorkers(int companyId);
+        string GetCompanyName(string login);
+        Company GetCompanyByLogin(string login);
     }
 }

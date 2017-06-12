@@ -18,6 +18,7 @@ namespace EvacuateMe.BLL.Interfaces
         bool ChangeStatus(Worker worker, int newStatus);
         bool ChangeLocation(Worker worker, LocationDTO newLocation);
         OrderClientDTO CheckForOrders(Worker worker);
+        void SignUp(WorkerSignUpDTO workerInfo, int companyId);
 
         void Dispose();
     }

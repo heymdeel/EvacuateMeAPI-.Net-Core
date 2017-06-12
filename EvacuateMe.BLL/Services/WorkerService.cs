@@ -136,5 +136,18 @@ namespace EvacuateMe.BLL.Services
         {
             db.Dispose();
         }
+
+        public void SignUp(WorkerSignUpDTO workerInfo, int companyId)
+        {
+            var worker = Mapper.Map<WorkerSignUpDTO, Worker>(workerInfo);
+
+            worker.ApiKey = encryptService.GenerateHash(worker.Phone, "key");
+            worker.CarTypeId = 1;
+            worker.CompanyId = companyId;
+            worker.DateOfHire = DateTime.Now;
+            worker.StatusId = 0;
+
+            db.Workers.Create(worker);
+        }
     }
 }

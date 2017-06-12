@@ -1,0 +1,27 @@
+@using EvacuateMe.BLL.DTO.CompanyDTO
+@model IEnumerable<WorkerDTO>
+
+@{
+    ViewData["Title"] = "Водители";
+}
+
+<div>
+    <form asp-action="Add" asp-controller="WorkersWebSite" method="get">
+        <input type="submit" value="Добавить водителя" class="add_company_btn">
+    </form>
+</div>
+
+@foreach (var worker in Model)
+{
+    <li class="company">
+        <div class="description">
+            <h1>@worker.Name @worker.Surname @worker.Patronymic</h1>
+            <p>Номер телефона: @worker.Phone</p>
+            <p>Номер машины: @worker.CarNumber</p>
+            <p>Дата рождения: @worker.DateOfBirth.ToString("dd MMMMMMM yyyy")</p>
+        </div>
+        <div class="map">
+            <img src="http://www.autofed.ru/wp-content/uploads/2014/08/TASS_6851769-pic4_zoom-1000x1000-44336.jpg" />
+        </div>
+    </li>
+}

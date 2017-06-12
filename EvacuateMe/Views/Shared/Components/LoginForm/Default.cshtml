@@ -10,7 +10,7 @@
     else
     {
         <p>Вы авторизованы как @ViewData["name"]</p>
-        <form asp-action="Logout" asp-controller="Account">
+        <form asp-action="Logout" asp-controller="Account" method="get">
             <input type="submit" value="Выйти">
         </form>
     }
