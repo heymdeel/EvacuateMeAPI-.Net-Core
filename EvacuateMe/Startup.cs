@@ -48,6 +48,7 @@ namespace EvacuateMe
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
             services.AddTransient<IOrderService, OrderService>();
             services.AddTransient<IAuthorizationService, AuthorizationService>();
+            services.AddTransient<ICompanyService, CompanyService>();
 
             // Add framework services.
             services.AddMvc();

@@ -4,7 +4,7 @@
     <ul class="aside-menu">
     @foreach (var b in Model)
     {
-        if (b.Key == ViewData["Title"])
+        if (b.Key == (string)ViewData["Title"])
         {
             <li class="active" )> @b.Key </li>
         }

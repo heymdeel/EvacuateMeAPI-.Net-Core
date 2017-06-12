@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EvacuateMe.BLL.DTO;
 using EvacuateMe.BLL.DTO.Clients;
+using EvacuateMe.BLL.DTO.CompanyDTO;
 using EvacuateMe.BLL.DTO.Orders;
 using EvacuateMe.BLL.DTO.Workers;
 using EvacuateMe.DAL.Entities;
@@ -38,6 +39,9 @@ namespace EvacuateMe.BLL
 
             CreateMap<Order, OrderHistoryDTO>();
             CreateMap<OrderHistoryDTO, Order>();
+
+            CreateMap<Company, CompanyDTO>();
+            CreateMap<CompanyDTO, Company>();
         }
     }
 }

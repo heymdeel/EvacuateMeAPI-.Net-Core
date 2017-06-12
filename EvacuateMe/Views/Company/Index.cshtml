@@ -1,0 +1,38 @@
+@using EvacuateMe.BLL.DTO.CompanyDTO
+@model IEnumerable<CompanyDTO>
+
+@{
+    ViewData["Title"] = "Компании";
+}
+
+@if (User.IsInRole("admin"))
+{
+    <div>
+        <form action="/Home/AddCompany" method="get">
+            <input type="submit" value="Добавить компанию" class="add_company_btn">
+        </form>
+    </div>
+
+}
+
+@if (Model != null)
+{
+    <ul style="none">
+        @foreach (var company in Model)
+        {
+            <li class="company">
+                <div class="description">
+                    <h1>@company.Name</h1>
+                    <p>@company.Description</p>
+                    <p>Адрес: @company.Address</p>
+                    <p>Номер телефона: @company.ContactPhone</p>
+                    <p>Контакты: <a href="mailto:@company.EMail">@company.EMail</a></p>
+                    <span class="rate">Рейтинг фирмы: @company.Rate</span>
+                </div>
+                <div class="map">
+                    <img src=@company.LogoUrl />
+                </div>
+            </li>
+        }
+    </ul>
+}

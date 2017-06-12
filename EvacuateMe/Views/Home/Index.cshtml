@@ -4,6 +4,12 @@
 
 <p>hello from DCP team</p>
 
+@if (!User.Identity.IsAuthenticated)
+{
+    <p>Пошёл нахер козёл</p>
+
+}
+
 @if (User.IsInRole("admin"))
 {
     <p>Ты админ</p>
