@@ -25,5 +25,7 @@ namespace EvacuateMe.DAL
         public DbSet<WorkerLocationHistory> WorkersLocationHistory { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<CarType> CarTypes { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
     }
 }

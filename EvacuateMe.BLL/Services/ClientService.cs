@@ -8,7 +8,6 @@ using AutoMapper;
 using EvacuateMe.DAL.Entities;
 using System.Text.RegularExpressions;
 using System.Linq;
-using EvacuateMe.BLL.BuisnessModels;
 using EvacuateMe.BLL.DTO.Clients;
 
 namespace EvacuateMe.BLL.Services
@@ -86,7 +85,7 @@ namespace EvacuateMe.BLL.Services
         {
             var carTypes = db.CarTypes.Get();
             
-            return carTypes.ToList().Count == 0 ? null : carTypes; 
+            return carTypes?.ToList().Count == 0 ? null : carTypes; 
         }
 
         public void Dispose()

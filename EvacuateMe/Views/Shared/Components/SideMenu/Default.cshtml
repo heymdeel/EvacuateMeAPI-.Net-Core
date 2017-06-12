@@ -1,0 +1,17 @@
+@model IEnumerable<KeyValuePair<string,string>>
+
+<nav>
+    <ul class="aside-menu">
+    @foreach (var b in Model)
+    {
+        if (b.Key == ViewData["Title"])
+        {
+            <li class="active" )> @b.Key </li>
+        }
+        else
+        {
+            <li><a href=@b.Value>@b.Key</a></li>
+        }
+    }
+    </ul>
+</nav>

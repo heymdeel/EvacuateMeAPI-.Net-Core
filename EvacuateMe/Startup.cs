@@ -47,6 +47,7 @@ namespace EvacuateMe
 
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
             services.AddTransient<IOrderService, OrderService>();
+            services.AddTransient<IAuthorizationService, AuthorizationService>();
 
             // Add framework services.
             services.AddMvc();
@@ -70,6 +71,14 @@ namespace EvacuateMe
             }
             
             app.UseStaticFiles();
+
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationScheme = "Cookies",
+                LoginPath = new Microsoft.AspNetCore.Http.PathString("/login"),
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true
+            });
 
             app.UseMvc(routes =>
             {

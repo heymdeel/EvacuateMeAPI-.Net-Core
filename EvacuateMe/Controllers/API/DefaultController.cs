@@ -34,7 +34,7 @@ namespace EvacuateMe.Controllers.API
             {
                 return BadRequest();
             }
-
+            
             smsService.Invoke(phone);
             return Ok();
         }

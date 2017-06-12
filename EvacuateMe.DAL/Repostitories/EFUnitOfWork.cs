@@ -18,6 +18,8 @@ namespace EvacuateMe.DAL.Repostitories
         private IRepository<WorkerLocationHistory> _workersLocationHistory;
         private IRepository<WorkerLastLocation> _workersLastLocation;
         private IRepository<CarType> _carTypes;
+        private IRepository<User> _users;
+        private IRepository<Role> _roles;
 
         public EFUnitOfWork()
         {
@@ -101,6 +103,26 @@ namespace EvacuateMe.DAL.Repostitories
                 if (_carTypes == null)
                     _carTypes = new EFGenericRepository<CarType>(db);
                 return _carTypes;
+            }
+        }
+
+        public IRepository<User> Users
+        {
+            get
+            {
+                if (_users == null)
+                    _users = new EFGenericRepository<User>(db);
+                return _users;
+            }
+        }
+
+        public IRepository<Role> Roles
+        {
+            get
+            {
+                if (_roles == null)
+                    _roles = new EFGenericRepository<Role>(db);
+                return _roles;
             }
         }
 
