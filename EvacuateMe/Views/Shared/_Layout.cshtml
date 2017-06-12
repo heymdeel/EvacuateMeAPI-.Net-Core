@@ -4,22 +4,24 @@
     <title> @ViewData["Title"]</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/Site.css" type="text/css">
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Oswald:400,300" type="text/css">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"></script>
 </head>
 <body>
     <div class="wrapper">
         <header></header>
-
+        
         <content>
             <div id="heading">
                 <h1>@ViewData["Title"]</h1>
             </div>
 
             <aside>
-                @await Component.InvokeAsync("LoginForm");
+                @await Component.InvokeAsync("LoginForm")
 
-                @await Component.InvokeAsync("SideMenu");
+                @await Component.InvokeAsync("SideMenu")
             </aside>
 
             <div id="main">

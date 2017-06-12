@@ -33,7 +33,7 @@ namespace EvacuateMe.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpPost, Route("logout")]
+        [HttpGet, Route("logout")]
         public async Task<ActionResult> Logout()
         {
             await HttpContext.Authentication.SignOutAsync("Cookies");

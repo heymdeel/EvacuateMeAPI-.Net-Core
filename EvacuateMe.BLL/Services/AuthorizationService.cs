@@ -19,11 +19,16 @@ namespace EvacuateMe.BLL.Services
             this.encryptService = encryptService;
         }
 
+        public string GetCompanyName(string login)
+        {
+            var company = db.Companies.FirstOrDefault(c => c.Login == login);
+
+            return company?.Name;
+        }
+
         public User Login(string login, string password)
         {
-            Console.WriteLine($"login == {login}, password == {password}");
             var hash = encryptService.GeneratePassword(login, password);
-            Console.WriteLine("hash == " + hash);
             return db.Users.FirstOrDefaultWithInclude(u => u.Login == login && u.Password == hash, u => u.Role);
         }
     }

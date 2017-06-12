@@ -42,6 +42,9 @@ namespace EvacuateMe.BLL
 
             CreateMap<Company, CompanyDTO>();
             CreateMap<CompanyDTO, Company>();
+
+            CreateMap<Company, CompanyRegisterDTO>();
+            CreateMap<CompanyRegisterDTO, Company>();
         }
     }
 }

@@ -1,7 +1,7 @@
 <div class="login">
     @if (!User.Identity.IsAuthenticated)
     {
-        <form asp-action="Login" asp-controller="Account" method="POST">
+        <form asp-action="Login" asp-controller="Account">
             <input type="text" name="login" placeholder="Логин" value="" class="inputValue">
             <input type="password" name="password" placeholder="Пароль" value="" class="inputValue">
             <input type="submit" value="Войти">
@@ -9,8 +9,8 @@
     }
     else
     {
-        <p>Вы авторизованы </p>
-        <form asp-action="Logout" asp-controller="Account" method="POST">
+        <p>Вы авторизованы как @ViewData["name"]</p>
+        <form asp-action="Logout" asp-controller="Account">
             <input type="submit" value="Выйти">
         </form>
     }

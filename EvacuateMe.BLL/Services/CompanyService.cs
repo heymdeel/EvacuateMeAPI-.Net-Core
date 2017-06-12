@@ -12,10 +12,20 @@ namespace EvacuateMe.BLL.Services
     public class CompanyService : ICompanyService
     {
         private readonly IUnitOfWork db;
+        private readonly IEncrypt encryptService;
 
-        public CompanyService(IUnitOfWork db)
+        public CompanyService(IUnitOfWork db, IEncrypt encryptService)
         {
             this.db = db;
+            this.encryptService = encryptService;
+        }
+
+        public void AddCommpany(CompanyRegisterDTO companyInfo)
+        {
+            var company = Mapper.Map<CompanyRegisterDTO, Company>(companyInfo);
+            company.ApiKey = encryptService.GenerateHash(company.Login, company.ContactPhone);
+
+            db.Companies.Create(company);
         }
 
         public IEnumerable<CompanyDTO> GetCompanies()

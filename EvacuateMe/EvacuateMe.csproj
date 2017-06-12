@@ -37,10 +37,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\PublishProfiles\" />
-    <Folder Include="Views\Company\" />
     <Folder Include="Views\Shared\Components\LoginForm\" />
     <Folder Include="Views\Shared\Components\LoginForm\" />
-    <Folder Include="Views\Company\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 

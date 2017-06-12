@@ -8,11 +8,10 @@
 @if (User.IsInRole("admin"))
 {
     <div>
-        <form action="/Home/AddCompany" method="get">
+        <form asp-action="Add" asp-controller="Company">
             <input type="submit" value="Добавить компанию" class="add_company_btn">
         </form>
     </div>
-
 }
 
 @if (Model != null)

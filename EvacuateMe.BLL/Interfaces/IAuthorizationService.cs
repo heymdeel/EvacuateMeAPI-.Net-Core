@@ -8,5 +8,6 @@ namespace EvacuateMe.BLL.Interfaces
     public interface IAuthorizationService
     {
         User Login(string login, string password);
+        string GetCompanyName(string login);
     }
 }

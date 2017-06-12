@@ -9,5 +9,6 @@ namespace EvacuateMe.BLL.Interfaces
     public interface ICompanyService
     {
         IEnumerable<CompanyDTO> GetCompanies();
+        void AddCommpany(CompanyRegisterDTO company);
     }
 }
