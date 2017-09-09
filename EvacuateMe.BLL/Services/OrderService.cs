@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using EvacuateMe.BLL.DTO.Orders;
 using EvacuateMe.BLL.BuisnessModels;
-using MoreLinq;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -350,7 +349,7 @@ namespace EvacuateMe.BLL.Services
                     continue;
 
                 var workerLocation = db.WorkersLastLocation.FindById(worker.Id);
-
+                
                 var distance = Task.Run(async () => await mapService.GetDistanceAsync(clientInfo.Latitude, clientInfo.Longitude, workerLocation.Latitude, workerLocation.Longitude)).Result;
                 var duration = Task.Run(async () => await mapService.GetDurationAsync(clientInfo.Latitude, clientInfo.Longitude, workerLocation.Latitude, workerLocation.Longitude)).Result;
 

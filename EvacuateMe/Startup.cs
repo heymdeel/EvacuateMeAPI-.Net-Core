@@ -36,19 +36,14 @@ namespace EvacuateMe
             string connection = Configuration.GetConnectionString("DefaultConnection");
 
             services.AddScoped<IEncrypt, EncryptService>();
-
-            services.AddTransient<IMapService, GoogleMapsService>();
-
-            services.AddSingleton<ISmsSender, GRequest>();
-
-            services.AddTransient<IClientService, ClientService>();
-
-            services.AddTransient<IWorkerService, WorkerService>();
-
+            services.AddScoped<IMapService, GoogleMapsService>();
+            services.AddScoped<ISmsSender, GRequest>();
+            services.AddScoped<IClientService, ClientService>();
+            services.AddScoped<IWorkerService, WorkerService>();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
-            services.AddTransient<IOrderService, OrderService>();
-            services.AddTransient<IAuthorizationService, AuthorizationService>();
-            services.AddTransient<ICompanyService, CompanyService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
+            services.AddScoped<ICompanyService, CompanyService>();
 
             // Add framework services.
             services.AddMvc();

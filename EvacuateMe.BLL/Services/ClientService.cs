@@ -15,6 +15,7 @@ namespace EvacuateMe.BLL.Services
     public class ClientService : IClientService
     {
         private readonly IUnitOfWork db;
+        
         private readonly IEncrypt encrypt;
 
         public ClientService(IUnitOfWork db, IEncrypt encrypt)

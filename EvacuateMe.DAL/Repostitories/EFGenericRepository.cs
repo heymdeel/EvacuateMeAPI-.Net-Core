@@ -66,8 +66,16 @@ namespace EvacuateMe.DAL.Repostitories
         public IEnumerable<TEntity> GetWithInclude(Expression<Func<TEntity, bool>> predicate,
             params Expression<Func<TEntity, object>>[] includeProperties)
         {
-            var query = Include(includeProperties);
-            return query.Where(predicate).ToList();
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+
+            query = query.Where(predicate);
+
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+
+            return query.ToList();
         }
 
         private IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] includeProperties)
@@ -82,6 +90,11 @@ namespace EvacuateMe.DAL.Repostitories
             var query = Include(includeProperties);
 
             return query.FirstOrDefault(predicate);
+        }
+
+        public IEnumerable<TEntity> TestMethod(Expression<Func<TEntity, bool>> predicate, int count,Expression<Func<TEntity, TEntity>> columns)
+        {
+            return _dbSet.Where(predicate).Select(columns).Skip(count);
         }
     }
 }

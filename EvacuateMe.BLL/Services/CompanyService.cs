@@ -25,8 +25,14 @@ namespace EvacuateMe.BLL.Services
         {
             var company = Mapper.Map<CompanyRegisterDTO, Company>(companyInfo);
             company.ApiKey = encryptService.GenerateHash(company.Login, company.ContactPhone);
-
             db.Companies.Create(company);
+            db.Users.Create(new User()
+            {
+                Login = company.Login,
+                Password = encryptService.GeneratePassword(company.Login, company.Password),
+                CompanyId = company.Id,
+                RoleId = 2
+            });
         }
 
         public IEnumerable<CompanyDTO> GetCompanies()
