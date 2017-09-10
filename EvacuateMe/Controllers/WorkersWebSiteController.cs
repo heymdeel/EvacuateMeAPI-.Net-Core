@@ -25,25 +25,25 @@ namespace EvacuateMe.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var company = companyService.GetCompanyByLogin(User.Identity.Name);
+            var company = await companyService.GetCompanyByLoginAsync(User.Identity.Name);
             if (company == null)
             {
                 return NotFound();
             }
 
-            var workers = companyService.GetWorkers(company.Id);
+            var workers = companyService.GetWorkersAsync(company.Id);
 
             return View(workers);
         }
 
-        [HttpGet, Route("add")]
+        [HttpGet("add")]
         [Authorize(Roles = "company")]
-        public async Task<IActionResult> Add()
+        public IActionResult Add()
         {
             return View();
         }
 
-        [HttpPost, ValidateAntiForgeryToken, Route("sign_up")]
+        [HttpPost("sign_up"), ValidateAntiForgeryToken]
         [Authorize(Roles = "company")]
         public async Task<IActionResult> Register(WorkerSignUpDTO workerInfo)
         {
@@ -52,13 +52,13 @@ namespace EvacuateMe.Controllers
                 return BadRequest(ModelState);
             }
 
-            var company = companyService.GetCompanyByLogin(User.Identity.Name);
+            var company = await companyService.GetCompanyByLoginAsync(User.Identity.Name);
             if (company == null)
             {
                 return NotFound();
             }
 
-            workerService.SignUp(workerInfo, company.Id);
+            await workerService.SignUpAsync(workerInfo, company.Id);
 
             return RedirectToAction("Index", "Home");
         }

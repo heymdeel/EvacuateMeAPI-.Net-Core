@@ -27,9 +27,9 @@ namespace EvacuateMe.BLL.Services
             this.mapService = mapService;
         }
 
-        public bool WorkerExists(string phone)
+        public async Task<bool> WorkerExistsAsync(string phone)
         {
-            var worker = db.Workers.FirstOrDefault(c => c.Phone == phone);
+            Worker worker = await db.Workers.FirstOrDefaultAsync(c => c.Phone == phone);
             return (worker != null);
         }
 
@@ -38,28 +38,28 @@ namespace EvacuateMe.BLL.Services
             return Regex.IsMatch(phone, "^[7-8][0-9]{10}$");
         }
 
-        public Worker SignIn(SmsDTO smsInfo)
+        public async Task<Worker> SignInAsync(SmsDTO smsInfo)
         {
-            var sms = db.SMSCodes.FirstOrDefault(s => s.Phone == smsInfo.Phone && s.Code == smsInfo.Code);
-            var worker = db.Workers.FirstOrDefault(c => c.Phone == smsInfo.Phone);
+            SMSCode sms = await db.SMSCodes.FirstOrDefaultAsync(s => s.Phone == smsInfo.Phone && s.Code == smsInfo.Code);
+            Worker worker = await db.Workers.FirstOrDefaultAsync(c => c.Phone == smsInfo.Phone);
             if (sms == null || worker == null)
             {
                 return null;
             }
 
-            db.SMSCodes.Remove(sms);
+            await db.SMSCodes.RemoveAsync(sms);
             worker.ApiKey = encryptService.GenerateHash(sms.Phone, sms.Code.ToString());
-            db.Workers.Update(worker);
+            await db.Workers.UpdateAsync(worker);
 
             return worker;
         }
 
-        public Worker GetByApiKey(string apiKey)
+        public async Task<Worker> GetByApiKeyAsync(string apiKey)
         {
-            return db.Workers.FirstOrDefault(c => c.ApiKey == apiKey);
+            return await db.Workers.FirstOrDefaultAsync(c => c.ApiKey == apiKey);
         }
 
-        public bool ChangeStatus(Worker worker, int newStatus)
+        public async Task<bool> ChangeStatusAsync(Worker worker, int newStatus)
         {
             if (!Enum.IsDefined(typeof(WorkerStatusEnum), newStatus))
             {
@@ -72,7 +72,7 @@ namespace EvacuateMe.BLL.Services
                 || (worker.StatusId == (int)WorkerStatusEnum.PerformingOrder && newStatus == (int)WorkerStatusEnum.Offline))
             {
                 worker.StatusId = newStatus;
-                db.Workers.Update(worker);
+                await db.Workers.UpdateAsync(worker);
 
                 return true;
             }
@@ -80,7 +80,7 @@ namespace EvacuateMe.BLL.Services
             return false;
         }
 
-        public bool ChangeLocation(Worker worker, LocationDTO newLocation)
+        public async Task<bool> ChangeLocationAsync(Worker worker, LocationDTO newLocation)
         {
             if (worker.StatusId == (int)WorkerStatusEnum.Offline)
             {
@@ -91,12 +91,12 @@ namespace EvacuateMe.BLL.Services
             locationHistory.TimeStamp = DateTime.Now;
             locationHistory.WorkerId = worker.Id;
 
-            db.WorkersLocationHistory.Create(locationHistory);
+            await db.WorkersLocationHistory.CreateAsync(locationHistory);
 
-            var lastLocation = db.WorkersLastLocation.FindById(worker.Id);
+            var lastLocation = await db.WorkersLastLocation.FindByIdAsync(worker.Id);
             if (lastLocation == null)
             {
-                db.WorkersLastLocation.Create(new WorkerLastLocation()
+                await db.WorkersLastLocation.CreateAsync(new WorkerLastLocation()
                 {
                     Latitude = newLocation.Latitude,
                     Longitude = newLocation.Longitude,
@@ -107,17 +107,17 @@ namespace EvacuateMe.BLL.Services
             {
                 lastLocation.Latitude = newLocation.Latitude;
                 lastLocation.Longitude = newLocation.Longitude;
-                db.WorkersLastLocation.Update(lastLocation);
+                await db.WorkersLastLocation.UpdateAsync(lastLocation);
             }
 
             return true;
         }
 
-        public OrderClientDTO CheckForOrders(Worker worker)
+        public async Task<OrderClientDTO> CheckForOrdersAsync(Worker worker)
         {
-            var order = db.Orders.FirstOrDefaultWithInclude(o => o.WorkerId == worker.Id
+            var order = await db.Orders.FirstOrDefaultAsync(filter: o => o.WorkerId == worker.Id
                         && o.StatusId == (int)OrderStatusEnum.Awaiting,
-                        c => c.Client);
+                        include: c => c.Client);
 
             if (order == null)
             {
@@ -126,18 +126,12 @@ namespace EvacuateMe.BLL.Services
 
             var orderInfo = Mapper.Map<Order, OrderClientDTO>(order);
             orderInfo.ClientPhone = order.Client.Phone;
-            orderInfo.Distance = Task.Run(async () => await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong, 
-                                                        order.StartWorkerLat, order.StartWorkerLong)).Result;
+            orderInfo.Distance = await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong, order.StartWorkerLat, order.StartWorkerLong);
 
             return orderInfo;
         }
 
-        public void Dispose()
-        {
-            db.Dispose();
-        }
-
-        public void SignUp(WorkerSignUpDTO workerInfo, int companyId)
+        public async Task SignUpAsync(WorkerSignUpDTO workerInfo, int companyId)
         {
             var worker = Mapper.Map<WorkerSignUpDTO, Worker>(workerInfo);
 
@@ -147,7 +141,7 @@ namespace EvacuateMe.BLL.Services
             worker.DateOfHire = DateTime.Now;
             worker.StatusId = 0;
 
-            db.Workers.Create(worker);
+            await db.Workers.CreateAsync(worker);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace EvacuateMe
 
             services.AddScoped<IEncrypt, EncryptService>();
             services.AddScoped<IMapService, GoogleMapsService>();
-            services.AddScoped<ISmsSender, GRequest>();
+            services.AddScoped<ISmsSender, SmsService>();
             services.AddScoped<IClientService, ClientService>();
             services.AddScoped<IWorkerService, WorkerService>();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();

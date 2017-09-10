@@ -125,30 +125,5 @@ namespace EvacuateMe.DAL.Repostitories
                 return _roles;
             }
         }
-
-        public void Save()
-        {
-            db.SaveChanges();
-        }
-
-        public virtual void Dispose(bool disposing)
-        {
-            if (!this.disposed)
-            {
-                if (disposing)
-                {
-                    db.Dispose();
-                }
-                this.disposed = true;
-            }
-        }
-
-        private bool disposed = false;
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
     }
 }

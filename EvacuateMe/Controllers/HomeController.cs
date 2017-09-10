@@ -13,22 +13,16 @@ namespace EvacuateMe.Controllers
     {
         // GET: Home
         [HttpGet, Route("Home"), Route("")]
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
-            return await Task.Run(() =>
-            {
-                return View();
-            });
+            return View();
         }
 
         // GET: about
         [HttpGet, Route("about")]
-        public async Task<ActionResult> About()
+        public ActionResult About()
         {
-            return await Task.Run(() =>
-            {
-                return View();
-            });
+            return View();
         }
     }
 }

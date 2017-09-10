@@ -6,23 +6,14 @@ using System.Threading.Tasks;
 
 namespace EvacuateMe.DAL.Interfaces
 {
-    public interface IRepository<TEntity> where TEntity : class
+    public interface IRepository<T> where T : class
     {
-        void Create(TEntity item);
-        TEntity FindById(int id);
-        IEnumerable<TEntity> Get();
-        void Remove(TEntity item);
-        void Update(TEntity item);
-
-        IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> predicate);
-
-        TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
-        TEntity FirstOrDefaultWithInclude(Expression<Func<TEntity, bool>> predicate,
-            params Expression<Func<TEntity, object>>[] includeProperties);
-
-        IEnumerable<TEntity> GetWithInclude(params Expression<Func<TEntity, object>>[] includeProperties);
-
-        IEnumerable<TEntity> GetWithInclude(Expression<Func<TEntity, bool>> predicate,
-            params Expression<Func<TEntity, object>>[] includeProperties);
+        Task CreateAsync(T item);
+        Task<T> FindByIdAsync(int id);
+        Task<IEnumerable<T>> GetAsync();
+        Task RemoveAsync(T item);
+        Task UpdateAsync(T item);
+        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, Expression<Func<T, T>> selector = null, params Expression<Func<T, object>>[] include);
+        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> filter = null, Expression<Func<T,T>> selector = null, int? page = null, int? size = null, params Expression<Func<T, object>>[] include);
     }
 }

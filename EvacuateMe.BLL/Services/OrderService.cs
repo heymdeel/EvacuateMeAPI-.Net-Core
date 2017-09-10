@@ -31,14 +31,14 @@ namespace EvacuateMe.BLL.Services
             this.mapService = mapService;
         }
 
-        public IEnumerable<OrderCompanyDTO> GetListOfCompanies(ClientLocationDTO clientInfo)
+        public async Task<IEnumerable<OrderCompanyDTO>> GetListOfCompaniesAsync(ClientLocationDTO clientInfo)
         {
             List<OrderCompanyDTO> result = new List<OrderCompanyDTO>();
 
-            var companies = db.Companies.GetWithInclude(c => c.Workers.Any(w => w.StatusId == (int)WorkerStatus.Working), c => c.Workers);
+            var companies = await db.Companies.GetAsync(c => c.Workers.Any(w => w.StatusId == (int)WorkerStatus.Working), include: c => c.Workers);
             foreach (var company in companies)
             {
-                var companyInfo = GetClosestWorker(company, clientInfo);
+                var companyInfo = await GetClosestWorkerAsync(company, clientInfo);
                 if (companyInfo != null)
                 {
                     result.Add(companyInfo);
@@ -48,17 +48,17 @@ namespace EvacuateMe.BLL.Services
             return result.Count == 0 ? null : result;
         }
 
-        public OrderWorkerDTO CreateOrder(Client client, OrderCreateDTO orderInfo)
+        public async Task<OrderWorkerDTO> CreateOrderAsync(Client client, OrderCreateDTO orderInfo)
         {
-            var company = db.Companies.FirstOrDefaultWithInclude(c => c.Id == orderInfo.CompanyId, c => c.Workers);
-            var worker = db.Workers.FindById(orderInfo.WorkerId);
+            Company company = await db.Companies.FirstOrDefaultAsync(c => c.Id == orderInfo.CompanyId, include: c => c.Workers);
+            Worker worker = await db.Workers.FindByIdAsync(orderInfo.WorkerId);
 
             if (!ValidateCompany(company, worker))
             {
                 return null;
             }
 
-            var workerLocation = db.WorkersLastLocation.FindById(worker.Id);
+            var workerLocation = await db.WorkersLastLocation.FindByIdAsync(worker.Id);
             if (workerLocation == null)
             {
                 return null;
@@ -72,7 +72,7 @@ namespace EvacuateMe.BLL.Services
             order.BeginingTime = DateTime.Now;
             order.StatusId = (int)OrderStatusEnum.Awaiting;
             order.Rate = 0;
-            db.Orders.Create(order);
+            await db.Orders.CreateAsync(order);
 
             var response = new OrderWorkerDTO()
             {
@@ -86,22 +86,22 @@ namespace EvacuateMe.BLL.Services
             return response;
         }
 
-        public LocationDTO GetWorkerLocation(int orderId)
+        public async Task<LocationDTO> GetWorkerLocationAsync(int orderId)
         {
-            var order = db.Orders.FindById(orderId);
+            var order = await db.Orders.FindByIdAsync(orderId);
             if (order == null)
             {
                 return null;
             }
 
-            var location = db.WorkersLastLocation.FindById(order.WorkerId);
+            var location = await db.WorkersLastLocation.FindByIdAsync(order.WorkerId);
 
             return Mapper.Map<WorkerLastLocation, LocationDTO>(location);
         }
 
-        public bool ChangeStatusByClient(int orderId, int newStatus)
+        public async Task<bool> ChangeStatusByClientAsync(int orderId, int newStatus)
         {
-            var order = db.Orders.FirstOrDefaultWithInclude(o => o.Id == orderId, o => o.Worker);
+            var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId, include: o => o.Worker);
 
             if ((order.StatusId == (int)OrderStatusEnum.Awaiting || order.StatusId == (int)OrderStatusEnum.OnTheWay)
                 && newStatus == (int)OrderStatusEnum.CanceledByClient)
@@ -109,8 +109,8 @@ namespace EvacuateMe.BLL.Services
                 order.StatusId = newStatus;
                 order.Worker.StatusId = (int)WorkerStatus.Offline;
 
-                db.Orders.Update(order);
-                db.Workers.Update(order.Worker);
+                await db.Orders.UpdateAsync(order);
+                await db.Workers.UpdateAsync(order.Worker);
 
                 return true;
             }
@@ -118,9 +118,9 @@ namespace EvacuateMe.BLL.Services
             return false;
         }
 
-        public bool ChangeStatusByWorker(int orderId, int newStatus)
+        public async Task<bool> ChangeStatusByWorkerAsync(int orderId, int newStatus)
         {
-            var order = db.Orders.FirstOrDefaultWithInclude(o => o.Id == orderId, o => o.Worker);
+            Order order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId, include: o => o.Worker);
 
             if (StatusIsCorrect(order.StatusId, newStatus))
             {
@@ -131,7 +131,7 @@ namespace EvacuateMe.BLL.Services
                     order.Worker.StatusId = (int)WorkerStatus.PerformingOrder;
                 }
 
-                var company = db.Companies.FindById(order.Worker.CompanyId);
+                var company = await db.Companies.FindByIdAsync(order.Worker.CompanyId);
 
                 if (newStatus == (int)OrderStatusEnum.CanceledByWorker)
                 {
@@ -147,37 +147,35 @@ namespace EvacuateMe.BLL.Services
                 {
                     order.Worker.StatusId = (int)WorkerStatus.Offline;
 
-                    var workerLocation = db.WorkersLastLocation.FindById(order.WorkerId);
+                    var workerLocation = await db.WorkersLastLocation.FindByIdAsync(order.WorkerId);
                     order.FinalLat = workerLocation.Latitude;
                     order.FinalLong = workerLocation.Longitude;
                     order.TerminationTime = DateTime.Now;
 
-                    order.Distance = Task.Run(async ()
-                        => await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong,
-                        order.FinalLat, order.FinalLong)).Result;
+                    order.Distance = await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong, order.FinalLat, order.FinalLong);
                     order.Summary = (order.Distance * company.Tariff) / 1000d + company.MinSum;
 
                 }
 
-                db.Orders.Update(order);
-                db.Companies.Update(company);
-                db.Workers.Update(order.Worker);
+                await db.Orders.UpdateAsync(order);
+                await db.Companies.UpdateAsync(company);
+                await db.Workers.UpdateAsync(order.Worker);
                 return true;
             }
 
             return false;
         }
 
-        public OrderStatus GetOrderStatus(int orderId)
+        public async Task<OrderStatus> GetOrderStatusAsync(int orderId)
         {
-            var order = db.Orders.FirstOrDefaultWithInclude(o => o.Id == orderId, o => o.Status);
+            Order order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId, include: o => o.Status);
 
             return order?.Status;
         }
 
-        public bool RateOrder(int orderId, int rate)
+        public async Task<bool> RateOrderAsync(int orderId, int rate)
         {
-            var order = db.Orders.FirstOrDefaultWithInclude(o => o.Id == orderId, o => o.Worker);
+            Order order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId, include: o => o.Worker);
             if (order == null)
             {
                 return false;
@@ -188,21 +186,21 @@ namespace EvacuateMe.BLL.Services
                 return false;
             }
 
-            var company = db.Companies.FindById(order.Worker.CompanyId);
+            var company = await db.Companies.FindByIdAsync(order.Worker.CompanyId);
 
             company.SumRate += rate;
             company.CountRate += 1;
             order.Rate = rate;
 
-            db.Orders.Update(order);
-            db.Companies.Update(company);
+            await db.Orders.UpdateAsync(order);
+            await db.Companies.UpdateAsync(company);
 
             return true;
         }
 
-        public CompletedOrderDTO GetOrderInfo(int orderId)
+        public async Task<CompletedOrderDTO> GetOrderInfoAsync(int orderId)
         {
-            var order = db.Orders.FindById(orderId);
+            Order order = await db.Orders.FindByIdAsync(orderId);
 
             if (order.StatusId != (int)OrderStatusEnum.Completed)
             {
@@ -210,14 +208,14 @@ namespace EvacuateMe.BLL.Services
             }
 
             var orderInfo = Mapper.Map<Order, CompletedOrderDTO>(order);
-            orderInfo.Company = db.Companies.FirstOrDefault(c => c.Workers.Any(w => w.Id == order.WorkerId)).Name;
+            orderInfo.Company = (await db.Companies.FirstOrDefaultAsync(c => c.Workers.Any(w => w.Id == order.WorkerId))).Name;
 
             return orderInfo;
         }
 
-        public IEnumerable<OrderHistoryDTO> GetClientHistory(Client client)
+        public async Task<IEnumerable<OrderHistoryDTO>> GetClientHistoryAsync(Client client)
         {
-            var orders = db.Orders.GetWithInclude(o => o.ClientId == client.Id, o => o.CarType);
+            var orders = await db.Orders.GetAsync(o => o.ClientId == client.Id, include: o => o.CarType);
 
             if (orders == null || orders.Count() == 0)
             {
@@ -234,9 +232,9 @@ namespace EvacuateMe.BLL.Services
             return history;
         }
 
-        public IEnumerable<OrderHistoryDTO> GetWorkerHistory(Worker worker)
+        public async Task<IEnumerable<OrderHistoryDTO>> GetWorkerHistoryAsync(Worker worker)
         {
-            var orders = db.Orders.GetWithInclude(o => o.WorkerId == worker.Id, o => o.CarType);
+            var orders = await db.Orders.GetAsync(o => o.WorkerId == worker.Id, include: o => o.CarType);
 
             if (orders == null || orders.Count() == 0)
             {
@@ -253,20 +251,20 @@ namespace EvacuateMe.BLL.Services
             return history;
         }
 
-        public bool ClientInOrder(int orderId, Client client)
+        public async Task<bool> ClientInOrderAsync(int orderId, Client client)
         {
-            var order = db.Orders.FindById(orderId);
+            var order = await db.Orders.FindByIdAsync(orderId);
             if (order?.ClientId == client.Id)
             {
                 return true;
             }
-           
+
             return false;
         }
 
-        public bool WorkerInOrder(int orderId, Worker worker)
+        public async Task<bool> WorkerInOrderAsync(int orderId, Worker worker)
         {
-            var order = db.Orders.FindById(orderId);
+            var order = await db.Orders.FindByIdAsync(orderId);
             if (order?.WorkerId == worker.Id)
             {
                 return true;
@@ -336,7 +334,7 @@ namespace EvacuateMe.BLL.Services
             return true;
         }
 
-        private OrderCompanyDTO GetClosestWorker(Company company, ClientLocationDTO clientInfo)
+        private async Task<OrderCompanyDTO> GetClosestWorkerAsync(Company company, ClientLocationDTO clientInfo)
         {
             double minDistance = -1;
             string minDuration = null;
@@ -348,10 +346,10 @@ namespace EvacuateMe.BLL.Services
                 if (worker.StatusId != (int)WorkerStatus.Working || worker.CarTypeId != clientInfo.CarType)
                     continue;
 
-                var workerLocation = db.WorkersLastLocation.FindById(worker.Id);
-                
-                var distance = Task.Run(async () => await mapService.GetDistanceAsync(clientInfo.Latitude, clientInfo.Longitude, workerLocation.Latitude, workerLocation.Longitude)).Result;
-                var duration = Task.Run(async () => await mapService.GetDurationAsync(clientInfo.Latitude, clientInfo.Longitude, workerLocation.Latitude, workerLocation.Longitude)).Result;
+                var workerLocation = await db.WorkersLastLocation.FindByIdAsync(worker.Id);
+
+                var distance = await mapService.GetDistanceAsync(clientInfo.Latitude, clientInfo.Longitude, workerLocation.Latitude, workerLocation.Longitude);
+                var duration = await mapService.GetDurationAsync(clientInfo.Latitude, clientInfo.Longitude, workerLocation.Latitude, workerLocation.Longitude);
 
                 if (minDistance == -1 || distance < minDistance)
                 {
@@ -373,11 +371,6 @@ namespace EvacuateMe.BLL.Services
             }
 
             return null;
-        }
-
-        public void Dispose()
-        {
-            db.Dispose();
         }
     }
 }

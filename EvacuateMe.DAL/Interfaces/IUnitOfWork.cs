@@ -17,8 +17,5 @@ namespace EvacuateMe.DAL.Interfaces
         IRepository<CarType> CarTypes { get; }
         IRepository<User> Users { get; }
         IRepository<Role> Roles { get; }
-
-        void Save();
-        void Dispose();
     }
 }

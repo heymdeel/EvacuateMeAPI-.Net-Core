@@ -3,15 +3,16 @@ using EvacuateMe.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EvacuateMe.BLL.Interfaces
 {
     public interface ICompanyService
     {
-        IEnumerable<CompanyDTO> GetCompanies();
-        void AddCommpany(CompanyRegisterDTO company);
-        IEnumerable<WorkerDTO> GetWorkers(int companyId);
-        string GetCompanyName(string login);
-        Company GetCompanyByLogin(string login);
+        Task<IEnumerable<CompanyDTO>> GetCompaniesAsync();
+        Task AddCommpanyAsync(CompanyRegisterDTO company);
+        Task<IEnumerable<WorkerDTO>> GetWorkersAsync(int companyId);
+        Task<string> GetCompanyNameAsync(string login);
+        Task<Company> GetCompanyByLoginAsync(string login);
     }
 }

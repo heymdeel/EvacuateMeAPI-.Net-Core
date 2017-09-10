@@ -10,19 +10,17 @@ namespace EvacuateMe.BLL.Interfaces
 {
     public interface IOrderService
     {
-        IEnumerable<OrderCompanyDTO> GetListOfCompanies(ClientLocationDTO clientInfo);
-        OrderWorkerDTO CreateOrder(Client client, OrderCreateDTO orderInfo);
-        LocationDTO GetWorkerLocation(int orderId);
-        bool ChangeStatusByClient(int orderId, int newStatus);
-        bool ChangeStatusByWorker(int orderId, int newStatus);
-        OrderStatus GetOrderStatus(int orderId);
-        bool RateOrder(int orderId, int rate);
-        CompletedOrderDTO GetOrderInfo(int orderId);
-        bool ClientInOrder(int orderId, Client client);
-        bool WorkerInOrder(int orderId, Worker worker);
-        IEnumerable<OrderHistoryDTO> GetClientHistory(Client client);
-        IEnumerable<OrderHistoryDTO> GetWorkerHistory(Worker worker);
-
-        void Dispose();
+        Task<IEnumerable<OrderCompanyDTO>> GetListOfCompaniesAsync(ClientLocationDTO clientInfo);
+        Task<OrderWorkerDTO> CreateOrderAsync(Client client, OrderCreateDTO orderInfo);
+        Task<LocationDTO> GetWorkerLocationAsync(int orderId);
+        Task<bool> ChangeStatusByClientAsync(int orderId, int newStatus);
+        Task<bool> ChangeStatusByWorkerAsync(int orderId, int newStatus);
+        Task<OrderStatus> GetOrderStatusAsync(int orderId);
+        Task<bool> RateOrderAsync(int orderId, int rate);
+        Task<CompletedOrderDTO> GetOrderInfoAsync(int orderId);
+        Task<bool> ClientInOrderAsync(int orderId, Client client);
+        Task<bool> WorkerInOrderAsync(int orderId, Worker worker);
+        Task<IEnumerable<OrderHistoryDTO>> GetClientHistoryAsync(Client client);
+        Task<IEnumerable<OrderHistoryDTO>> GetWorkerHistoryAsync(Worker worker);
     }
 }

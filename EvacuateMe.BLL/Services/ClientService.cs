@@ -9,13 +9,13 @@ using EvacuateMe.DAL.Entities;
 using System.Text.RegularExpressions;
 using System.Linq;
 using EvacuateMe.BLL.DTO.Clients;
+using System.Threading.Tasks;
 
 namespace EvacuateMe.BLL.Services
 {
     public class ClientService : IClientService
     {
         private readonly IUnitOfWork db;
-        
         private readonly IEncrypt encrypt;
 
         public ClientService(IUnitOfWork db, IEncrypt encrypt)
@@ -24,74 +24,66 @@ namespace EvacuateMe.BLL.Services
             this.encrypt = encrypt;
         }
 
-        public bool ClientExists(string phone)
+        public async Task<bool> ClientExistsAsync(string phone)
         {
-            var client = db.Clients.FirstOrDefault(c => c.Phone == phone);
-            return (client != null);
+            Client client = await db.Clients.FirstOrDefaultAsync(filter: c => c.Phone == phone, selector: c => new Client());
+            return client != null;
         }
 
-        public bool ValidatePhone(string phone)
-        {
-            return Regex.IsMatch(phone, "^[7-8][0-9]{10}$");
-        }
+        public bool ValidatePhone(string phone) => Regex.IsMatch(phone, "^[7-8][0-9]{10}$");
 
-        public string SignUp(ClientSignUpDTO clientData)
+        public async Task<string> SignUpAsync(ClientSignUpDTO clientData)
         {
             int code = clientData.Code;
-            var client = Mapper.Map<ClientSignUpDTO, Client>(clientData);
+            Client client = Mapper.Map<ClientSignUpDTO, Client>(clientData);
 
-            var sms = db.SMSCodes.FirstOrDefault(s => s.Phone == client.Phone && s.Code == code);
+            SMSCode sms = await db.SMSCodes.FirstOrDefaultAsync(s => s.Phone == client.Phone && s.Code == code);
             if (sms == null)
             {
                 return null;
             }
 
-            db.SMSCodes.Remove(sms);
-            var apiKey = encrypt.GenerateHash(client.Phone, code.ToString());
+            await db.SMSCodes.RemoveAsync(sms);
+            string apiKey = encrypt.GenerateHash(client.Phone, code.ToString());
             client.ApiKey = apiKey;
-            db.Clients.Create(client);
+            await db.Clients.CreateAsync(client);
 
             return apiKey;
         }
 
-        public Client SignIn(SmsDTO smsInfo)
+        public async Task<Client> SignInAsync(SmsDTO smsInfo)
         {
-            var sms = db.SMSCodes.FirstOrDefault(s => s.Phone == smsInfo.Phone && s.Code == smsInfo.Code);
-            var client = db.Clients.FirstOrDefault(c => c.Phone == smsInfo.Phone);
+            SMSCode sms = await db.SMSCodes.FirstOrDefaultAsync(s => s.Phone == smsInfo.Phone && s.Code == smsInfo.Code);
+            Client client = await db.Clients.FirstOrDefaultAsync(c => c.Phone == smsInfo.Phone);
             if (sms == null || client == null)
             {
                 return null;
             }
 
-            db.SMSCodes.Remove(sms);
+            await db.SMSCodes.RemoveAsync(sms);
             client.ApiKey = encrypt.GenerateHash(sms.Phone, sms.Code.ToString());
-            db.Clients.Update(client);
+            await db.Clients.UpdateAsync(client);
             
             return client;
         }
 
-        public Client GetByApiKey(string apiKey)
+        public async Task<Client> GetByApiKeyAsync(string apiKey)
         {
-            return db.Clients.FirstOrDefault(c => c.ApiKey == apiKey);
+            return await db.Clients.FirstOrDefaultAsync(c => c.ApiKey == apiKey);
         }
 
-        public void ChangeCar(Client client, CarDTO newCar)
+        public async Task ChangeCarAsync(Client client, CarDTO newCar)
         {
             client.CarColour = newCar.Colour;
             client.CarModel = newCar.Model;
-            db.Clients.Update(client);
+            await db.Clients.UpdateAsync(client);
         }
 
-        public IEnumerable<CarType> GetCarTypes()
+        public async Task<IEnumerable<CarType>> GetCarTypesAsync()
         {
-            var carTypes = db.CarTypes.Get();
+            var carTypes = await db.CarTypes.GetAsync();
             
             return carTypes?.ToList().Count == 0 ? null : carTypes; 
-        }
-
-        public void Dispose()
-        {
-            db.Dispose();
         }
     }
 }

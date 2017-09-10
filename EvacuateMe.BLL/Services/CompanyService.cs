@@ -7,6 +7,7 @@ using EvacuateMe.DAL.Interfaces;
 using AutoMapper;
 using EvacuateMe.DAL.Entities;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -21,12 +22,12 @@ namespace EvacuateMe.BLL.Services
             this.encryptService = encryptService;
         }
 
-        public void AddCommpany(CompanyRegisterDTO companyInfo)
+        public async Task AddCommpanyAsync(CompanyRegisterDTO companyInfo)
         {
-            var company = Mapper.Map<CompanyRegisterDTO, Company>(companyInfo);
+            Company company = Mapper.Map<CompanyRegisterDTO, Company>(companyInfo);
             company.ApiKey = encryptService.GenerateHash(company.Login, company.ContactPhone);
-            db.Companies.Create(company);
-            db.Users.Create(new User()
+            await db.Companies.CreateAsync(company);
+            await db.Users.CreateAsync(new User()
             {
                 Login = company.Login,
                 Password = encryptService.GeneratePassword(company.Login, company.Password),
@@ -35,10 +36,10 @@ namespace EvacuateMe.BLL.Services
             });
         }
 
-        public IEnumerable<CompanyDTO> GetCompanies()
+        public async Task<IEnumerable<CompanyDTO>> GetCompaniesAsync()
         {
             List<CompanyDTO> result = new List<CompanyDTO>();
-            foreach (var c in db.Companies.Get())
+            foreach (var c in await db.Companies.GetAsync())
             {
                 var company = Mapper.Map<Company, CompanyDTO>(c);
                 company.Rate = c.CountRate == 0 ? 0 : (double)c.SumRate / c.CountRate;
@@ -48,21 +49,21 @@ namespace EvacuateMe.BLL.Services
             return result;
         }
 
-        public Company GetCompanyByLogin(string login)
+        public async Task<Company> GetCompanyByLoginAsync(string login)
         {
-            return db.Companies.FirstOrDefault(c => c.Login == login);
+            return await db.Companies.FirstOrDefaultAsync(c => c.Login == login);
         }
 
-        public string GetCompanyName(string login)
+        public async Task<string> GetCompanyNameAsync(string login)
         {
-            var company = db.Companies.FirstOrDefault(c => c.Login == login);
+            Company company = await db.Companies.FirstOrDefaultAsync(c => c.Login == login);
 
             return company?.Name;
         }
 
-        public IEnumerable<WorkerDTO> GetWorkers(int companyId)
+        public async Task<IEnumerable<WorkerDTO>> GetWorkersAsync(int companyId)
         {
-            var workers = db.Workers.Get(w => w.CompanyId == companyId).ToList();
+            var workers = await db.Workers.GetAsync(w => w.CompanyId == companyId);
             var result = new List<WorkerDTO>();
             foreach (var w in workers)
             {

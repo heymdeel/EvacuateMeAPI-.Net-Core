@@ -22,17 +22,14 @@ namespace EvacuateMe.Controllers
         [HttpGet, Route("companies")]
         public async Task<IActionResult> Index()
         {
-            var companies = companyService.GetCompanies();
+            var companies = await companyService.GetCompaniesAsync();
 
-            return await Task.Run(() =>
-            {
-                return View(companies);
-            });
+            return View(companies);
         }
 
         [HttpGet, Route("companies/add")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Add()
+        public IActionResult Add()
         {
             return View();
         }
@@ -46,7 +43,7 @@ namespace EvacuateMe.Controllers
                 return BadRequest();
             }
 
-            companyService.AddCommpany(company);
+            await companyService.AddCommpanyAsync(company);
 
             return RedirectToAction("Index", "Home");
         }

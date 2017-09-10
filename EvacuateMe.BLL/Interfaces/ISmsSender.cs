@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EvacuateMe.BLL.Interfaces
 {
     public interface ISmsSender
     {
-        void Invoke(string phone);
-        void Dispose();
+        Task InvokeAsync(string phone);
     }
 }

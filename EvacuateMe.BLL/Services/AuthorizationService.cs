@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -19,10 +20,11 @@ namespace EvacuateMe.BLL.Services
             this.encryptService = encryptService;
         }
 
-        public User Login(string login, string password)
+        public async Task<User> LoginAsync(string login, string password)
         {
-            var hash = encryptService.GeneratePassword(login, password);
-            return db.Users.FirstOrDefaultWithInclude(u => u.Login == login && u.Password == hash, u => u.Role);
+            string hash = encryptService.GeneratePassword(login, password);
+
+            return await db.Users.FirstOrDefaultAsync(filter: u => u.Login == login && u.Password == hash, include: u => u.Role);
         }
     }
 }

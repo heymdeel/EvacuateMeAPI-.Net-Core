@@ -26,6 +26,6 @@ namespace EvacuateMe.DAL.Entities
         [Column("car_colour")]
         public string CarColour { get; set; }
 
-        public virtual ICollection<Order> Order { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }

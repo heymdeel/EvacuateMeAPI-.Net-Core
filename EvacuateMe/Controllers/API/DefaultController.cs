@@ -27,28 +27,29 @@ namespace EvacuateMe.Controllers.API
         }
 
         // GET: api/code/{phone}
-        [HttpGet, Route("code/{phone}")]
+        [HttpGet("code/{phone}")]
         public async Task<IActionResult> SendCode(string phone)
         {
             if (!clientService.ValidatePhone(phone))
             {
                 return BadRequest();
             }
-            
-            smsService.Invoke(phone);
+
+            await smsService.InvokeAsync(phone);
+
             return Ok();
         }
 
-        [HttpGet, Route("car_types")]
+        [HttpGet("car_types")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> CarTypes([FromHeader(Name = "api_key")]string apiKey)
         {
-            if (clientService.GetByApiKey(apiKey) == null)
+            if (clientService.GetByApiKeyAsync(apiKey) == null)
             {
                 return Unauthorized();
             }
 
-            var carTypes = clientService.GetCarTypes();
+            var carTypes = await clientService.GetCarTypesAsync();
             if (carTypes == null)
             {
                 return NotFound();
@@ -58,11 +59,11 @@ namespace EvacuateMe.Controllers.API
         }
 
         // POST: api/help/companies
-        [HttpPost, Route("help/companies")]
+        [HttpPost("help/companies")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> ListOfCompanies([FromHeader(Name = "api_key")]string apiKey, [FromBody]ClientLocationDTO clientInfo)
         {
-            if (clientService.GetByApiKey(apiKey) == null)
+            if (await clientService.GetByApiKeyAsync(apiKey) == null)
             {
                 return Unauthorized();
             }
@@ -72,7 +73,7 @@ namespace EvacuateMe.Controllers.API
                 return BadRequest(ModelState);
             }
 
-            var response = orderService.GetListOfCompanies(clientInfo);
+            var response = orderService.GetListOfCompaniesAsync(clientInfo);
 
             if (response == null)
             {

@@ -9,92 +9,89 @@ using System.Threading.Tasks;
 
 namespace EvacuateMe.DAL.Repostitories
 {
-    public class EFGenericRepository<TEntity> : IRepository<TEntity> where TEntity : class
+    public class EFGenericRepository<T> : IRepository<T> where T : class
     {
         private EFPostgreSQLContext _context;
-        private DbSet<TEntity> _dbSet;
+        private DbSet<T> _dbSet;
 
         public EFGenericRepository(EFPostgreSQLContext db)
         {
             _context = db;
-            _dbSet = _context.Set<TEntity>();
+            _dbSet = _context.Set<T>();
         }
 
-        public void Create(TEntity item)
+        public async Task CreateAsync(T item)
         {
             _dbSet.Add(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public TEntity FindById(int id)
+        public async Task<T> FindByIdAsync(int id)
         {
-            return _dbSet.Find(id);
+            return await _dbSet.FindAsync(id);
         }
 
-        public IEnumerable<TEntity> Get()
+        public async Task<IEnumerable<T>> GetAsync()
         {
-            return _dbSet.AsNoTracking().ToList();
+            return await _dbSet.AsNoTracking().ToListAsync();
         }
 
-        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> predicate)
-        {
-            return _dbSet.AsNoTracking().Where(predicate).ToList();
-        }
-
-        public TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
-        {
-            return _dbSet.FirstOrDefault(predicate);
-        }
-
-        public void Remove(TEntity item)
+        public async Task RemoveAsync(T item)
         {
             _dbSet.Remove(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void Update(TEntity item)
+        public async Task UpdateAsync(T item)
         {
             _context.Entry(item).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public IEnumerable<TEntity> GetWithInclude(params Expression<Func<TEntity, object>>[] includeProperties)
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> filter = null, Expression<Func<T, T>> selector = null, int? page = null, int? size = null, params Expression<Func<T, object>>[] include)
         {
-            return Include(includeProperties).ToList();
-        }
+            IQueryable<T> query = _dbSet.AsNoTracking();
 
-        public IEnumerable<TEntity> GetWithInclude(Expression<Func<TEntity, bool>> predicate,
-            params Expression<Func<TEntity, object>>[] includeProperties)
-        {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
-
-            query = query.Where(predicate);
-
-            foreach (var includeProperty in includeProperties)
+            if (filter != null)
             {
-                query = query.Include(includeProperty);
+                query = query.Where(filter);
             }
 
-            return query.ToList();
+            if (selector != null)
+            {
+                query = query.Select(selector);
+            }
+
+            foreach (var item in include)
+            {
+                query = query.Include(item);
+            }
+
+            if (page != null && size != null)
+            {
+                query = query.Skip((page.Value - 1) * size.Value).Take(size.Value);
+            }
+
+            return await query.ToListAsync();
         }
 
-        private IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] includeProperties)
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, Expression<Func<T, T>> selector = null, params Expression<Func<T, object>>[] include)
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
-            return includeProperties
-                .Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
-        }
+            IQueryable<T> query = _dbSet;
 
-        public TEntity FirstOrDefaultWithInclude(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includeProperties)
-        {
-            var query = Include(includeProperties);
+            query = query.Where(filter);
 
-            return query.FirstOrDefault(predicate);
-        }
+            foreach(var x in include)
+            {
+                query = query.Include(x);
+            }
 
-        public IEnumerable<TEntity> TestMethod(Expression<Func<TEntity, bool>> predicate, int count,Expression<Func<TEntity, TEntity>> columns)
-        {
-            return _dbSet.Where(predicate).Select(columns).Skip(count);
+            if (selector != null)
+            {
+                query = query.Select(selector);
+            }
+            
+            return await query.FirstOrDefaultAsync();
         }
     }
 }

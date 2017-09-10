@@ -7,6 +7,7 @@ using EvacuateMe.Filters;
 using EvacuateMe.BLL.Interfaces;
 using EvacuateMe.BLL.DTO;
 using EvacuateMe.BLL.DTO.Workers;
+using EvacuateMe.DAL.Entities;
 
 namespace EvacuateMe.Controllers.API
 {
@@ -22,7 +23,7 @@ namespace EvacuateMe.Controllers.API
         }
 
         // GET api/workers/verification/{phone}
-        [HttpGet, Route("verification/{phone}")]
+        [HttpGet("verification/{phone}")]
         public async Task<IActionResult> VerificatePhone(string phone)
         {
             if (!workerService.ValidatePhone(phone))
@@ -30,7 +31,7 @@ namespace EvacuateMe.Controllers.API
                 return BadRequest();
             }
 
-            if (workerService.WorkerExists(phone))
+            if (await workerService.WorkerExistsAsync(phone))
             {
                 return Ok();
             }
@@ -39,7 +40,7 @@ namespace EvacuateMe.Controllers.API
         }
 
         // POST api/workers/login
-        [HttpPost, Route("login")]
+        [HttpPost("login")]
         public async Task<IActionResult> SignIn([FromBody]SmsDTO sms)
         {
             if (sms == null || !TryValidateModel(sms))
@@ -47,27 +48,27 @@ namespace EvacuateMe.Controllers.API
                 return BadRequest(ModelState);
             }
 
-            var worker = workerService.SignIn(sms);
+            Worker worker = await workerService.SignInAsync(sms);
             if (worker != null)
             {
                 return Ok(worker.ApiKey);
             }
-            
+
             return NotFound();
         }
 
         // PUT api/workers/status/{newStatus}
-        [HttpPut, Route("status/{newStatus:int}")]
+        [HttpPut("status/{newStatus:int}")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> ChangeStatus([FromHeader(Name = "api_key")]string apiKey, int newStatus)
         {
-            var worker = workerService.GetByApiKey(apiKey);
+            Worker worker = await workerService.GetByApiKeyAsync(apiKey);
             if (worker == null)
             {
                 return Unauthorized();
             }
 
-            if (workerService.ChangeStatus(worker, newStatus))
+            if (await workerService.ChangeStatusAsync(worker, newStatus))
             {
                 return Ok();
             }
@@ -76,11 +77,11 @@ namespace EvacuateMe.Controllers.API
         }
 
         // PUT api/workers/location
-        [HttpPut, Route("location")]
+        [HttpPut("location")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> ChangeLocation([FromHeader(Name = "api_key")]string apiKey, [FromBody]LocationDTO newLocation)
         {
-            var worker = workerService.GetByApiKey(apiKey);
+            Worker worker = await workerService.GetByApiKeyAsync(apiKey);
             if (worker == null)
             {
                 return Unauthorized();
@@ -91,7 +92,7 @@ namespace EvacuateMe.Controllers.API
                 return BadRequest(ModelState);
             }
 
-            if (workerService.ChangeLocation(worker, newLocation))
+            if (await workerService.ChangeLocationAsync(worker, newLocation))
             {
                 return Ok();
             }
@@ -100,17 +101,17 @@ namespace EvacuateMe.Controllers.API
         }
 
         // GET api/workers/orders
-        [HttpGet, Route("orders")]
+        [HttpGet("orders")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> CheckForOrders([FromHeader(Name = "api_key")]string apiKey)
         {
-            var worker = workerService.GetByApiKey(apiKey);
+            Worker worker = await workerService.GetByApiKeyAsync(apiKey);
             if (worker == null)
             {
                 return Unauthorized();
             }
 
-            var orderInfo = workerService.CheckForOrders(worker);
+            var orderInfo = await workerService.CheckForOrdersAsync(worker);
             if (orderInfo != null)
             {
                 return Json(orderInfo);

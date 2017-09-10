@@ -18,10 +18,10 @@ namespace EvacuateMe.Controllers
             this.authorizationService = authorizationService;
         }
 
-        [HttpPost, Route("login")]
+        [HttpPost("login")]
         public async Task<ActionResult> Login(string login, string password)
         {
-            var user = authorizationService.Login(login, password);
+            var user = await authorizationService.LoginAsync(login, password);
 
             if (user != null)
             {
@@ -33,7 +33,7 @@ namespace EvacuateMe.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet, Route("logout")]
+        [HttpGet("logout")]
         public async Task<ActionResult> Logout()
         {
             await HttpContext.Authentication.SignOutAsync("Cookies");

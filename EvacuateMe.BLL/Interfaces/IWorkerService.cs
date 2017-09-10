@@ -12,14 +12,12 @@ namespace EvacuateMe.BLL.Interfaces
     public interface IWorkerService
     {
         bool ValidatePhone(string phone);
-        bool WorkerExists(string phone);
-        Worker SignIn(SmsDTO smsInfo);
-        Worker GetByApiKey(string apiKey);
-        bool ChangeStatus(Worker worker, int newStatus);
-        bool ChangeLocation(Worker worker, LocationDTO newLocation);
-        OrderClientDTO CheckForOrders(Worker worker);
-        void SignUp(WorkerSignUpDTO workerInfo, int companyId);
-
-        void Dispose();
+        Task<bool> WorkerExistsAsync(string phone);
+        Task<Worker> SignInAsync(SmsDTO smsInfo);
+        Task<Worker> GetByApiKeyAsync(string apiKey);
+        Task<bool> ChangeStatusAsync(Worker worker, int newStatus);
+        Task<bool> ChangeLocationAsync(Worker worker, LocationDTO newLocation);
+        Task<OrderClientDTO> CheckForOrdersAsync(Worker worker);
+        Task SignUpAsync(WorkerSignUpDTO workerInfo, int companyId);
     }
 }

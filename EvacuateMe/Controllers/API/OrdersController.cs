@@ -34,7 +34,7 @@ namespace EvacuateMe.Controllers.API
         [RequireApiKeyFilter]
         public async Task<IActionResult> Create([FromHeader(Name = "api_key")]string apiKey, [FromBody]OrderCreateDTO orderInfo)
         {
-            var client = clientService.GetByApiKey(apiKey);
+            Client client = await clientService.GetByApiKeyAsync(apiKey);
             if (client == null)
             {
                 return Unauthorized();
@@ -45,7 +45,7 @@ namespace EvacuateMe.Controllers.API
                 return BadRequest(ModelState);
             }
 
-            var response = orderService.CreateOrder(client, orderInfo);
+            var response = await orderService.CreateOrderAsync(client, orderInfo);
 
             if (response == null)
             {
@@ -56,22 +56,22 @@ namespace EvacuateMe.Controllers.API
         }
 
         // GET api/orders/{idOrder}/worker/location
-        [HttpGet, Route("{orderId:int}/worker/location")]
+        [HttpGet("{orderId:int}/worker/location")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> CurrentLocation([FromHeader(Name = "api_key")]string apiKey, int orderId)
         {
-            var client = clientService.GetByApiKey(apiKey);
+            Client client = await clientService.GetByApiKeyAsync(apiKey);
             if (client == null)
             {
                 return Unauthorized();
             }
 
-            if (!orderService.ClientInOrder(orderId, client))
+            if (!await orderService.ClientInOrderAsync(orderId, client))
             {
                 return StatusCode(403);
             }
 
-            var response = orderService.GetWorkerLocation(orderId);
+            var response = await orderService.GetWorkerLocationAsync(orderId);
             if (response == null)
             {
                 return NotFound();
@@ -81,12 +81,12 @@ namespace EvacuateMe.Controllers.API
         }
 
         // PUT api/orders/{id}/status/{status}
-        [HttpPut, Route("{orderId:int}/status/{newStatus:int}")]
+        [HttpPut("{orderId:int}/status/{newStatus:int}")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> ChangeStatus([FromHeader(Name = "api_key")]string apiKey, int orderId, int newStatus)
         {
-            var client = clientService.GetByApiKey(apiKey);
-            var worker = workerService.GetByApiKey(apiKey);
+            Client client = await clientService.GetByApiKeyAsync(apiKey);
+            Worker worker = await workerService.GetByApiKeyAsync(apiKey);
 
             if (client == null && worker == null)
             {
@@ -96,21 +96,21 @@ namespace EvacuateMe.Controllers.API
             bool statusChanged = false;
             if (worker == null)
             {
-                if (!orderService.ClientInOrder(orderId, client))
+                if (!await orderService.ClientInOrderAsync(orderId, client))
                 {
                     return StatusCode(403);
                 }
 
-                statusChanged = orderService.ChangeStatusByClient(orderId, newStatus);
+                statusChanged = await orderService.ChangeStatusByClientAsync(orderId, newStatus);
             }
             else
             {
-                if (!orderService.WorkerInOrder(orderId, worker))
+                if (!await orderService.WorkerInOrderAsync(orderId, worker))
                 {
                     return StatusCode(403);
                 }
 
-                statusChanged = orderService.ChangeStatusByWorker(orderId, newStatus);
+                statusChanged = await orderService.ChangeStatusByWorkerAsync(orderId, newStatus);
             }
 
             if (statusChanged)
@@ -122,28 +122,28 @@ namespace EvacuateMe.Controllers.API
         }
 
         // GET api/orders/{id}/status
-        [HttpGet, Route("{orderId:int}/status")]
+        [HttpGet("{orderId:int}/status")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> GetStatus([FromHeader(Name = "api_key")]string apiKey, int orderId)
         {
-            var client = clientService.GetByApiKey(apiKey);
-            var worker = workerService.GetByApiKey(apiKey);
+            Client client = await clientService.GetByApiKeyAsync(apiKey);
+            Worker worker = await workerService.GetByApiKeyAsync(apiKey);
             if (client == null && worker == null)
             {
                 return Unauthorized();
             }
 
-            if (worker == null && !orderService.ClientInOrder(orderId, client))
+            if (worker == null && !await orderService.ClientInOrderAsync(orderId, client))
             {
                 return StatusCode(403);
             }
             else
-            if (!orderService.WorkerInOrder(orderId, worker))
+            if (!await orderService.WorkerInOrderAsync(orderId, worker))
             {
                 return StatusCode(403);
             }
 
-            var status = orderService.GetOrderStatus(orderId);
+            var status = await orderService.GetOrderStatusAsync(orderId);
             if (status == null)
             {
                 return NotFound();
@@ -153,23 +153,23 @@ namespace EvacuateMe.Controllers.API
         }
 
         // PUT api/orders/{id}/rate/{rate}
-        [HttpPut, Route("{orderId:int}/rate/{rate:int}")]
+        [HttpPut("{orderId:int}/rate/{rate:int}")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> Rate([FromHeader(Name = "api_key")]string apiKey, int orderId, int rate)
         {
-            var client = clientService.GetByApiKey(apiKey);
+            Client client = await clientService.GetByApiKeyAsync(apiKey);
 
             if (client == null)
             {
                 return Unauthorized();
             }
 
-            if (!orderService.ClientInOrder(orderId, client))
+            if (!await orderService.ClientInOrderAsync(orderId, client))
             {
                 return StatusCode(403);
             }
 
-            if (orderService.RateOrder(orderId, rate))
+            if (await orderService.RateOrderAsync(orderId, rate))
             {
                 return Ok();
             }
@@ -178,28 +178,28 @@ namespace EvacuateMe.Controllers.API
         }
 
         // GET api/orders/{id}/info
-        [HttpGet, Route("{orderId:int}/info")]
+        [HttpGet("{orderId:int}/info")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> GetDetailedInfo([FromHeader(Name = "api_key")]string apiKey, int orderId)
         {
-            var client = clientService.GetByApiKey(apiKey);
-            var worker = workerService.GetByApiKey(apiKey);
+            Client client = await clientService.GetByApiKeyAsync(apiKey);
+            Worker worker = await workerService.GetByApiKeyAsync(apiKey);
             if (client == null && worker == null)
             {
                 return Unauthorized();
             }
 
-            if (client != null && !orderService.ClientInOrder(orderId, client))
+            if (client != null && !await orderService.ClientInOrderAsync(orderId, client))
             {
                 return StatusCode(403);
             }
 
-            if (worker != null && !orderService.WorkerInOrder(orderId, worker))
+            if (worker != null && !await orderService.WorkerInOrderAsync(orderId, worker))
             {
                 return StatusCode(403);
             }
 
-            var orderInfo = orderService.GetOrderInfo(orderId); ;
+            var orderInfo = await orderService.GetOrderInfoAsync(orderId); ;
             if (orderInfo == null)
             {
                 return NotFound();
@@ -209,12 +209,12 @@ namespace EvacuateMe.Controllers.API
         }
 
         // GET api/orders/history
-        [HttpGet, Route("history")]
+        [HttpGet("history")]
         [RequireApiKeyFilter]
         public async Task<IActionResult> GetOrdersHistory([FromHeader(Name = "api_key")]string apiKey)
         {
-            var client = clientService.GetByApiKey(apiKey);
-            var worker = workerService.GetByApiKey(apiKey);
+            Client client = await clientService.GetByApiKeyAsync(apiKey);
+            Worker worker = await workerService.GetByApiKeyAsync(apiKey);
             if (client == null && worker == null)
             {
                 return Unauthorized();
@@ -223,11 +223,11 @@ namespace EvacuateMe.Controllers.API
             List<OrderHistoryDTO> history;
             if (worker == null)
             {
-                history = orderService.GetClientHistory(client)?.ToList();
+                history = (await orderService.GetClientHistoryAsync(client))?.ToList();
             }
             else
             {
-                history = orderService.GetWorkerHistory(worker)?.ToList();
+                history = (await orderService.GetWorkerHistoryAsync(worker))?.ToList();
             }
 
             if (history == null)
