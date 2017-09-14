@@ -14,7 +14,7 @@ namespace EvacuateMe
         {
             CreateMap<Company, CompanyVM>();
 
-            CreateMap<IEnumerable<Worker>, IEnumerable<WorkerVM>>();
+            CreateMap<Worker, WorkerVM>();
 
             CreateMap<Order, OrderClientVM>();
 
