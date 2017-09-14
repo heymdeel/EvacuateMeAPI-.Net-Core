@@ -49,9 +49,14 @@ namespace EvacuateMe.DAL
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> filter = null, Expression<Func<T, T>> selector = null, int? page = null, int? size = null, params Expression<Func<T, object>>[] include)
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> filter = null, Expression<Func<T, T>> selector = null, int? page = null, int? size = null, Expression<Func<T, object>> include = null)
         {
             IQueryable<T> query = _dbSet.AsNoTracking();
+
+            if (include != null)
+            {
+                query = query.Include(include);
+            }
 
             if (filter != null)
             {
@@ -63,11 +68,6 @@ namespace EvacuateMe.DAL
                 query = query.Select(selector);
             }
 
-            foreach (var item in include)
-            {
-                query = query.Include(item);
-            }
-
             if (page != null && size != null)
             {
                 query = query.Skip((page.Value - 1) * size.Value).Take(size.Value);
@@ -76,15 +76,15 @@ namespace EvacuateMe.DAL
             return await query.ToListAsync();
         }
 
-        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, Expression<Func<T, T>> selector = null, params Expression<Func<T, object>>[] include)
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, Expression<Func<T, T>> selector = null, Expression<Func<T, object>> include = null)
         {
             IQueryable<T> query = _dbSet;
 
             query = query.Where(filter);
 
-            foreach(var x in include)
+            if (include != null)
             {
-                query = query.Include(x);
+                query = query.Include(include);
             }
 
             if (selector != null)

@@ -81,15 +81,5 @@ namespace EvacuateMe.Controllers.API
 
             return Json(response);
         }
-
-        [HttpGet("test")]
-        public async Task<IActionResult> Test()
-        {
-            var client = await clientService.GetByApiKeyAsync("31c4dd88a29494f2deeae365ca24c4a2");
-
-            var clientVM = AutoMapper.Mapper.Map<ClientRegisterDTO>(client);
-
-            return Json(clientVM);
-        }
     }
 }
