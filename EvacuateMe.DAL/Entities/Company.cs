@@ -1,7 +1,6 @@
-﻿using System;
+﻿using LinqToDB.Mapping;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvacuateMe.DAL.Entities
 {
@@ -47,6 +46,7 @@ namespace EvacuateMe.DAL.Entities
         [Column("api_key")]
         public string ApiKey { get; set; }
 
-        public virtual ICollection<Worker> Workers { get; set; }
+        [Association(ThisKey = "Id", OtherKey = "CompanyId")]
+        public IEnumerable<Worker> Workers { get; set; }
     }
 }

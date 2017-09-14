@@ -1,7 +1,6 @@
-﻿using System;
+﻿using LinqToDB.Mapping;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvacuateMe.DAL.Entities
 {
@@ -17,10 +16,9 @@ namespace EvacuateMe.DAL.Entities
         [Column("time_stamp")]
         public DateTime TimeStamp { get; set; }
 
-        [ForeignKey("Worker")]
         [Column("worker")]
         public int WorkerId { get; set; }
 
-        public virtual Worker Worker { get; set; }
+        public Worker Worker { get; set; }
     }
 }

@@ -1,12 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LinqToDB.Mapping;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvacuateMe.DAL.Entities
 {
-    [Table("workers", Schema = "public"),]
+    [Table("workers", Schema = "public")]
     public class Worker : Entity
     {        
         [Column("name")]
@@ -33,27 +32,27 @@ namespace EvacuateMe.DAL.Entities
         [Column("car_number")]
         public string CarNumber { get; set; }
 
-        [ForeignKey("Company")]
         [Column("company")]
         public int CompanyId { get; set; }
 
-        [ForeignKey("Status")]
         [Column("status")]
         public int StatusId { get; set; }
 
-        [ForeignKey("CarType")]
         [Column("supported_car_type")]
         public int CarTypeId { get; set; }
 
-        public virtual Company Company { get; set; }
+        public Company Company { get; set; }
 
-        public virtual CarType CarType { get; set; }
+        public CarType CarType { get; set; }
 
-        public virtual ICollection<WorkerLocationHistory> LocationHistory { get; set; }
+        [Association(ThisKey = "Id", OtherKey = "WorkerId")]
+        public IEnumerable<WorkerLocationHistory> LocationHistory { get; set; }
 
-        public virtual WorkerLastLocation LastLocation { get; set; }
+        [Association(ThisKey = "Id", OtherKey = "Id")]
+        public WorkerLastLocation LastLocation { get; set; }
 
-        public virtual ICollection<Order> Order { get; set; }
+        [Association(ThisKey = "Id", OtherKey = "WorkerId")]
+        public IEnumerable<Order> Order { get; set; }
     }
 }
 

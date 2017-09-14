@@ -1,7 +1,6 @@
-﻿using System;
+﻿using LinqToDB.Mapping;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace EvacuateMe.DAL.Entities
@@ -12,7 +11,8 @@ namespace EvacuateMe.DAL.Entities
         [Column("name")]
         public string Name { get; set; }
 
-        public virtual ICollection<User> Users { get; set; }
+        [Association(ThisKey = "Id", OtherKey = "RoleId")]
+        public IEnumerable<User> Users { get; set; }
 
         public Role()
         {

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using EvacuateMe.BLL.BuisnessModels;
 using EvacuateMe.DAL;
+using System.Diagnostics;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -34,7 +35,13 @@ namespace EvacuateMe.BLL.Services
         {
             List<OrderCompanyDTO> result = new List<OrderCompanyDTO>();
 
+            var sw = new Stopwatch();
+            sw.Start();
             var companies = await db.Companies.GetAsync(c => c.Workers.Any(w => w.StatusId == (int)WorkerStatus.Working), include: c => c.Workers);
+            sw.Stop();
+            Console.WriteLine("-------------------------------------------------------------");
+            Console.WriteLine($"Elapsed time on query == {sw.ElapsedMilliseconds}ms");
+            Console.WriteLine("--------------------------------------------------------------");
             foreach (var company in companies)
             {
                 var companyInfo = await GetClosestWorkerAsync(company, clientInfo);

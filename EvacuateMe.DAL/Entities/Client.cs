@@ -1,7 +1,6 @@
-﻿using System;
+﻿using LinqToDB.Mapping;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvacuateMe.DAL.Entities
 {
@@ -23,6 +22,7 @@ namespace EvacuateMe.DAL.Entities
         [Column("car_colour")]
         public string CarColour { get; set; }
 
-        public virtual ICollection<Order> Orders { get; set; }
+        [Association(ThisKey = "Id", OtherKey = "ClientId")]
+        public IEnumerable<Order> Orders { get; set; }
     }
 }

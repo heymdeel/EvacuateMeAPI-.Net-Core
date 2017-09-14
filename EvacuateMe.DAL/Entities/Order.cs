@@ -1,17 +1,16 @@
-﻿using System;
+﻿using LinqToDB.Mapping;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvacuateMe.DAL.Entities
 {
     [Table("orders", Schema = "public")]
     public class Order : Entity
     {        
-        [Column("client"), ForeignKey("Client")]
+        [Column("client")]
         public int ClientId { get; set; }
 
-        [Column("worker"), ForeignKey("Worker")]
+        [Column("worker")]
         public int WorkerId { get; set; }
 
         [Column("start_client_lat")]
@@ -44,7 +43,7 @@ namespace EvacuateMe.DAL.Entities
         [Column("car_colour")]
         public string CarColour { get; set; }
 
-        [Column("car_type"), ForeignKey("CarType")]
+        [Column("car_type")]
         public int CarTypeId { get; set; }
 
         [Column("summary")]
@@ -56,15 +55,15 @@ namespace EvacuateMe.DAL.Entities
         [Column("rate")]
         public int Rate { get; set; }
 
-        [Column("status"), ForeignKey("Status")]
+        [Column("status")]
         public int StatusId { get; set; }
 
-        public virtual Client Client { get; set; }
+        public Client Client { get; set; }
 
-        public virtual Worker Worker { get; set; }
+        public Worker Worker { get; set; }
 
-        public virtual CarType CarType { get; set; }
+        public CarType CarType { get; set; }
 
-        public virtual OrderStatus Status { get; set; }
+        public OrderStatus Status { get; set; }
     }
 }

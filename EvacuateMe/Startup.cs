@@ -39,7 +39,7 @@ namespace EvacuateMe
             services.AddScoped<ISmsSender, SmsService>();
             services.AddScoped<IClientService, ClientService>();
             services.AddScoped<IWorkerService, WorkerService>();
-            services.AddTransient<IUnitOfWork, EFUnitOfWork>();
+            services.AddTransient<IUnitOfWork, L2DBUnitOfWork>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<ICompanyService, CompanyService>();

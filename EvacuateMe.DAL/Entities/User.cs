@@ -1,7 +1,6 @@
-﻿using System;
+﻿using LinqToDB.Mapping;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace EvacuateMe.DAL.Entities
@@ -10,7 +9,6 @@ namespace EvacuateMe.DAL.Entities
     public class User : Entity
     {        
         [Column("company")]
-        [ForeignKey("Company")]
         public int CompanyId { get; set; }
 
         [Column("login")]
@@ -20,11 +18,10 @@ namespace EvacuateMe.DAL.Entities
         public string Password { get; set; }
 
         [Column("role")]
-        [ForeignKey("Role")]
         public int? RoleId { get; set; }
 
-        public virtual Role Role { get; set; }
+        public Role Role { get; set; }
 
-        public virtual Company Company { get; set; }
+        public Company Company { get; set; }
     }
 }

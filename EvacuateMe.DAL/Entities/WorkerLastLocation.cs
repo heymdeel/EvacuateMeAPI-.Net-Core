@@ -1,7 +1,6 @@
-﻿using System;
+﻿using LinqToDB.Mapping;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvacuateMe.DAL.Entities
 {
@@ -9,7 +8,6 @@ namespace EvacuateMe.DAL.Entities
     public class WorkerLastLocation : Entity
     {   
         [Column("worker")]
-        [Key, ForeignKey("Worker")]
         public override int Id { get; set; }
 
         [Column("latitude")]
@@ -18,6 +16,6 @@ namespace EvacuateMe.DAL.Entities
         [Column("longitude")]
         public double Longitude { get; set; }
 
-        public virtual Worker Worker { get; set; }
+        public Worker Worker { get; set; }
     }
 }
