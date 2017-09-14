@@ -7,12 +7,8 @@ using System.Text;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("roles", Schema = "public")]
-    public class Role
-    {
-        [Column("id")]
-        [Key]
-        public int Id { get; set; }
-
+    public class Role : Entity
+    {        
         [Column("name")]
         public string Name { get; set; }
 

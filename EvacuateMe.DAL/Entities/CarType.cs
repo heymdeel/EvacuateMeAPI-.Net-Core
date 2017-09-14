@@ -6,11 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("car_type", Schema = "public")]
-    public class CarType
+    public class CarType : Entity
     {
-        [Key, Column("id")]
-        public int Id { get; set; }
-
         [Column("name")]
         public string Name { get; set; }
 

@@ -1,11 +1,10 @@
-﻿using EvacuateMe.DAL.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using EvacuateMe.DAL.Entities;
-using Microsoft.EntityFrameworkCore;
+using EvacuateMe.DAL.Contexts;
 
-namespace EvacuateMe.DAL.Repostitories
+namespace EvacuateMe.DAL
 {
     public class EFUnitOfWork : IUnitOfWork
     {
@@ -31,7 +30,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_clients == null)
-                    _clients = new EFGenericRepository<Client>(db);
+                    _clients = new EFRepository<Client>(db);
                 return _clients;
             }
         }
@@ -41,7 +40,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_workers == null)
-                    _workers = new EFGenericRepository<Worker>(db);
+                    _workers = new EFRepository<Worker>(db);
                 return _workers;
             }
         }
@@ -51,7 +50,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_companies == null)
-                    _companies = new EFGenericRepository<Company>(db);
+                    _companies = new EFRepository<Company>(db);
                 return _companies;
             }
         }
@@ -61,7 +60,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_smsCodes == null)
-                    _smsCodes = new EFGenericRepository<SMSCode>(db);
+                    _smsCodes = new EFRepository<SMSCode>(db);
                 return _smsCodes;
             }
         }
@@ -71,7 +70,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_orders == null)
-                    _orders = new EFGenericRepository<Order>(db);
+                    _orders = new EFRepository<Order>(db);
                 return _orders;
             }
         }
@@ -81,7 +80,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_workersLastLocation == null)
-                    _workersLastLocation = new EFGenericRepository<WorkerLastLocation>(db);
+                    _workersLastLocation = new EFRepository<WorkerLastLocation>(db);
                 return _workersLastLocation;
             }
         }
@@ -91,7 +90,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_workersLocationHistory == null)
-                    _workersLocationHistory = new EFGenericRepository<WorkerLocationHistory>(db);
+                    _workersLocationHistory = new EFRepository<WorkerLocationHistory>(db);
                 return _workersLocationHistory;
             }
         }
@@ -101,7 +100,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_carTypes == null)
-                    _carTypes = new EFGenericRepository<CarType>(db);
+                    _carTypes = new EFRepository<CarType>(db);
                 return _carTypes;
             }
         }
@@ -111,7 +110,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_users == null)
-                    _users = new EFGenericRepository<User>(db);
+                    _users = new EFRepository<User>(db);
                 return _users;
             }
         }
@@ -121,7 +120,7 @@ namespace EvacuateMe.DAL.Repostitories
             get
             {
                 if (_roles == null)
-                    _roles = new EFGenericRepository<Role>(db);
+                    _roles = new EFRepository<Role>(db);
                 return _roles;
             }
         }

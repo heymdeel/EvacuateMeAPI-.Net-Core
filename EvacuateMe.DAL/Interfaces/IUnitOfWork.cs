@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EvacuateMe.DAL.Interfaces
+namespace EvacuateMe.DAL
 {
     public interface IUnitOfWork
     {

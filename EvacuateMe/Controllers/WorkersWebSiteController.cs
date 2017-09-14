@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using EvacuateMe.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using EvacuateMe.BLL.DTO.Workers;
+using EvacuateMe.BLL.DTO;
+using EvacuateMe.ViewModels;
+using EvacuateMe.DAL.Entities;
+using AutoMapper;
 
 namespace EvacuateMe.Controllers
 {
@@ -31,9 +34,10 @@ namespace EvacuateMe.Controllers
                 return NotFound();
             }
 
-            var workers = companyService.GetWorkersAsync(company.Id);
+            var workers = await companyService.GetWorkersAsync(company.Id);
+            var workersVM = Mapper.Map<IEnumerable<Worker>, IEnumerable<WorkerVM>>(workers);
 
-            return View(workers);
+            return View(workersVM);
         }
 
         [HttpGet("add")]
@@ -45,7 +49,7 @@ namespace EvacuateMe.Controllers
 
         [HttpPost("sign_up"), ValidateAntiForgeryToken]
         [Authorize(Roles = "company")]
-        public async Task<IActionResult> Register(WorkerSignUpDTO workerInfo)
+        public async Task<IActionResult> Register(WorkerRegisterDTO workerInfo)
         {
             if (!ModelState.IsValid)
             {

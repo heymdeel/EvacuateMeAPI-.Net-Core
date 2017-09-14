@@ -1,4 +1,5 @@
-﻿using EvacuateMe.DAL.Interfaces;
+﻿using EvacuateMe.DAL.Contexts;
+using EvacuateMe.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,14 +8,14 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvacuateMe.DAL.Repostitories
+namespace EvacuateMe.DAL
 {
-    public class EFGenericRepository<T> : IRepository<T> where T : class
+    public class EFRepository<T> : IRepository<T> where T : Entity
     {
         private EFPostgreSQLContext _context;
         private DbSet<T> _dbSet;
 
-        public EFGenericRepository(EFPostgreSQLContext db)
+        public EFRepository(EFPostgreSQLContext db)
         {
             _context = db;
             _dbSet = _context.Set<T>();

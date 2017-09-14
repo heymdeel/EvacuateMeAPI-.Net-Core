@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using EvacuateMe.Filters;
 using EvacuateMe.BLL.Interfaces;
 using EvacuateMe.BLL.DTO;
-using EvacuateMe.BLL.DTO.Workers;
 using EvacuateMe.DAL.Entities;
+using AutoMapper;
+using EvacuateMe.ViewModels;
 
 namespace EvacuateMe.Controllers.API
 {
@@ -16,10 +17,12 @@ namespace EvacuateMe.Controllers.API
     public class WorkersController : Controller
     {
         private readonly IWorkerService workerService;
+        private readonly IMapService mapService;
 
-        public WorkersController(IWorkerService workerService)
+        public WorkersController(IWorkerService workerService, IMapService mapService)
         {
             this.workerService = workerService;
+            this.mapService = mapService;
         }
 
         // GET api/workers/verification/{phone}
@@ -111,13 +114,17 @@ namespace EvacuateMe.Controllers.API
                 return Unauthorized();
             }
 
-            var orderInfo = await workerService.CheckForOrdersAsync(worker);
-            if (orderInfo != null)
+            var order = await workerService.CheckForOrdersAsync(worker);
+            if (order == null)
             {
-                return Json(orderInfo);
+                return NotFound();
             }
 
-            return NotFound();
+            var orderVM = Mapper.Map<Order, OrderClientVM>(order);
+            orderVM.ClientPhone = order.Client.Phone;
+            orderVM.Distance = await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong, order.StartWorkerLat, order.StartWorkerLong);
+
+            return Json(orderVM);
         }
     }
 }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EvacuateMe.BLL.DTO.CompanyDTO
+namespace EvacuateMe.ViewModels
 {
-    public class CompanyDTO
+    public class CompanyVM
     {
         public string Name { get; set; }
 

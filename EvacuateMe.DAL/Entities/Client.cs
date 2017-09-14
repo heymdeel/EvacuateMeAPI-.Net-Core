@@ -6,11 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("clients", Schema = "public"),]
-    public class Client
-    {
-        [Key, Column("id")]
-        public int Id { get; set; }
-
+    public class Client : Entity
+    {        
         [Column("name")]
         public string Name { get; set; }
 

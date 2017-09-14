@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace EvacuateMe.BLL.DTO.Workers
+namespace EvacuateMe.BLL.DTO
 {
-    public class WorkerSignUpDTO
+    public class WorkerRegisterDTO
     {
         [Display(Name = "Имя")]
         [Required, StringLength(15, MinimumLength = 3, ErrorMessage = "Длина имени должна быть от 3 до 15 символов")]

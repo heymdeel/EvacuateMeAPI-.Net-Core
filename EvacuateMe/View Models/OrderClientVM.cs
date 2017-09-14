@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EvacuateMe.BLL.DTO.Workers
+namespace EvacuateMe.ViewModels
 {
-    public class OrderClientDTO
+    public class OrderClientVM
     {
         [JsonProperty("order_id")]
         public int Id { get; set; }

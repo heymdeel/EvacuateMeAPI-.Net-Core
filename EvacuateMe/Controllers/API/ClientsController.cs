@@ -7,7 +7,6 @@ using EvacuateMe.Filters;
 using EvacuateMe.BLL.Interfaces;
 using EvacuateMe.BLL.DTO;
 using System.Threading;
-using EvacuateMe.BLL.DTO.Clients;
 using EvacuateMe.DAL.Entities;
 
 namespace EvacuateMe.Controllers.API
@@ -42,7 +41,7 @@ namespace EvacuateMe.Controllers.API
 
         // POST api/clients
         [HttpPost]
-        public async Task<IActionResult> SignUp([FromBody]ClientSignUpDTO client)
+        public async Task<IActionResult> SignUp([FromBody]ClientRegisterDTO client)
         {
             if (client == null || !TryValidateModel(client))
             {

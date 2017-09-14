@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using EvacuateMe.BLL.DTO.CompanyDTO;
-using EvacuateMe.DAL.Interfaces;
 using AutoMapper;
 using EvacuateMe.DAL.Entities;
 using System.Linq;
 using System.Threading.Tasks;
+using EvacuateMe.DAL;
+using EvacuateMe.BLL.DTO;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -36,17 +36,9 @@ namespace EvacuateMe.BLL.Services
             });
         }
 
-        public async Task<IEnumerable<CompanyDTO>> GetCompaniesAsync()
+        public async Task<IEnumerable<Company>> GetCompaniesAsync()
         {
-            List<CompanyDTO> result = new List<CompanyDTO>();
-            foreach (var c in await db.Companies.GetAsync())
-            {
-                var company = Mapper.Map<Company, CompanyDTO>(c);
-                company.Rate = c.CountRate == 0 ? 0 : (double)c.SumRate / c.CountRate;
-                result.Add(company);
-            }
-
-            return result;
+            return await db.Companies.GetAsync();
         }
 
         public async Task<Company> GetCompanyByLoginAsync(string login)
@@ -61,16 +53,9 @@ namespace EvacuateMe.BLL.Services
             return company?.Name;
         }
 
-        public async Task<IEnumerable<WorkerDTO>> GetWorkersAsync(int companyId)
+        public async Task<IEnumerable<Worker>> GetWorkersAsync(int companyId)
         {
-            var workers = await db.Workers.GetAsync(w => w.CompanyId == companyId);
-            var result = new List<WorkerDTO>();
-            foreach (var w in workers)
-            {
-                result.Add(Mapper.Map<Worker, WorkerDTO>(w));
-            }
-
-            return result;
+            return await db.Workers.GetAsync(w => w.CompanyId == companyId);
         }
     }
 }

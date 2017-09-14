@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Text;
 using EvacuateMe.BLL.BuisnessModels;
 using EvacuateMe.DAL.Entities;
-using EvacuateMe.DAL.Interfaces;
 using System.Linq;
 using System.Text.RegularExpressions;
 using EvacuateMe.BLL.DTO;
 using AutoMapper;
 using System.Threading.Tasks;
-using EvacuateMe.BLL.DTO.Workers;
+using EvacuateMe.DAL;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -61,15 +60,15 @@ namespace EvacuateMe.BLL.Services
 
         public async Task<bool> ChangeStatusAsync(Worker worker, int newStatus)
         {
-            if (!Enum.IsDefined(typeof(WorkerStatusEnum), newStatus))
+            if (!Enum.IsDefined(typeof(WorkerStatus), newStatus))
             {
                 return false;
             }
 
-            if ((worker.StatusId == (int)WorkerStatusEnum.Offline && newStatus == (int)WorkerStatusEnum.Working)
-                || (worker.StatusId == (int)WorkerStatusEnum.Working && newStatus == (int)WorkerStatusEnum.Offline)
-                || (worker.StatusId == (int)WorkerStatusEnum.Working && newStatus == (int)WorkerStatusEnum.PerformingOrder)
-                || (worker.StatusId == (int)WorkerStatusEnum.PerformingOrder && newStatus == (int)WorkerStatusEnum.Offline))
+            if ((worker.StatusId == (int)WorkerStatus.Offline && newStatus == (int)WorkerStatus.Working)
+                || (worker.StatusId == (int)WorkerStatus.Working && newStatus == (int)WorkerStatus.Offline)
+                || (worker.StatusId == (int)WorkerStatus.Working && newStatus == (int)WorkerStatus.PerformingOrder)
+                || (worker.StatusId == (int)WorkerStatus.PerformingOrder && newStatus == (int)WorkerStatus.Offline))
             {
                 worker.StatusId = newStatus;
                 await db.Workers.UpdateAsync(worker);
@@ -82,7 +81,7 @@ namespace EvacuateMe.BLL.Services
 
         public async Task<bool> ChangeLocationAsync(Worker worker, LocationDTO newLocation)
         {
-            if (worker.StatusId == (int)WorkerStatusEnum.Offline)
+            if (worker.StatusId == (int)WorkerStatus.Offline)
             {
                 return false;
             }
@@ -113,27 +112,18 @@ namespace EvacuateMe.BLL.Services
             return true;
         }
 
-        public async Task<OrderClientDTO> CheckForOrdersAsync(Worker worker)
+        public async Task<Order> CheckForOrdersAsync(Worker worker)
         {
             var order = await db.Orders.FirstOrDefaultAsync(filter: o => o.WorkerId == worker.Id
-                        && o.StatusId == (int)OrderStatusEnum.Awaiting,
+                        && o.StatusId == (int)BuisnessModels.OrderStatus.Awaiting,
                         include: c => c.Client);
 
-            if (order == null)
-            {
-                return null;
-            }
-
-            var orderInfo = Mapper.Map<Order, OrderClientDTO>(order);
-            orderInfo.ClientPhone = order.Client.Phone;
-            orderInfo.Distance = await mapService.GetDistanceAsync(order.StartClientLat, order.StartClientLong, order.StartWorkerLat, order.StartWorkerLong);
-
-            return orderInfo;
+            return order;
         }
 
-        public async Task SignUpAsync(WorkerSignUpDTO workerInfo, int companyId)
+        public async Task SignUpAsync(WorkerRegisterDTO workerInfo, int companyId)
         {
-            var worker = Mapper.Map<WorkerSignUpDTO, Worker>(workerInfo);
+            var worker = Mapper.Map<WorkerRegisterDTO, Worker>(workerInfo);
 
             worker.ApiKey = encryptService.GenerateHash(worker.Phone, "key");
             worker.CarTypeId = 1;

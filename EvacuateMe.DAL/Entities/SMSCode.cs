@@ -7,11 +7,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("sms_codes", Schema = "public"),]
-    public class SMSCode
-    {
-        [Key, Column("id")]
-        public int Id { get; set; }
-
+    public class SMSCode : Entity
+    {        
         [Column("phone")]
         public string Phone { get; set; }
 

@@ -3,15 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EvacuateMe.BLL.DTO.Orders
+namespace EvacuateMe.ViewModels
 {
-    public class CompletedOrderDTO
+    public class CompletedOrderVM
     {
         [JsonProperty("order_id")]
         public int Id { get; set; }
-
-        [JsonProperty("company")]
-        public string Company { get; set; }
 
         [JsonProperty("summary")]
         public double Summary { get; set; }

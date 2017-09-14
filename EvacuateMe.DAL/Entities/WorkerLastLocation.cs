@@ -6,11 +6,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("workers_last_location", Schema = "public")]
-    public class WorkerLastLocation
+    public class WorkerLastLocation : Entity
     {   
         [Column("worker")]
         [Key, ForeignKey("Worker")]
-        public int WorkerId { get; set; }
+        public override int Id { get; set; }
 
         [Column("latitude")]
         public double Latitude { get; set; }

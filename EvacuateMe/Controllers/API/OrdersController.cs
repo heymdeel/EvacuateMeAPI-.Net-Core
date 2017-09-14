@@ -8,9 +8,10 @@ using EvacuateMe.Filters;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using EvacuateMe.BLL.DTO;
-using EvacuateMe.BLL.DTO.Orders;
 using EvacuateMe.BLL.Interfaces;
 using EvacuateMe.DAL.Entities;
+using EvacuateMe.ViewModels;
+using AutoMapper;
 
 namespace EvacuateMe.Controllers.API
 {
@@ -45,12 +46,21 @@ namespace EvacuateMe.Controllers.API
                 return BadRequest(ModelState);
             }
 
-            var response = await orderService.CreateOrderAsync(client, orderInfo);
+            Order order = await orderService.CreateOrderAsync(client, orderInfo);
 
-            if (response == null)
+            if (order == null)
             {
                 return NotFound();
             }
+
+            var response = new OrderWorkerVM()
+            {
+                OrderId = order.Id,
+                Name = order.Worker.Name,
+                Latitude = order.Worker.LastLocation.Latitude,
+                Longitude = order.Worker.LastLocation.Longitude,
+                Phone = order.Worker.Phone
+            };
 
             return Created("", response);
         }
@@ -199,13 +209,15 @@ namespace EvacuateMe.Controllers.API
                 return StatusCode(403);
             }
 
-            var orderInfo = await orderService.GetOrderInfoAsync(orderId); ;
-            if (orderInfo == null)
+            Order order = await orderService.GetOrderInfoAsync(orderId); ;
+            if (order == null)
             {
                 return NotFound();
             }
 
-            return Json(orderInfo);
+            var orderVM = Mapper.Map<Order, CompletedOrderVM>(order);
+
+            return Json(orderVM);
         }
 
         // GET api/orders/history
@@ -220,22 +232,30 @@ namespace EvacuateMe.Controllers.API
                 return Unauthorized();
             }
 
-            List<OrderHistoryDTO> history;
+            IEnumerable<Order> orders;
             if (worker == null)
             {
-                history = (await orderService.GetClientHistoryAsync(client))?.ToList();
+                orders = await orderService.GetClientHistoryAsync(client);
             }
             else
             {
-                history = (await orderService.GetWorkerHistoryAsync(worker))?.ToList();
+                orders = await orderService.GetWorkerHistoryAsync(worker);
             }
 
-            if (history == null)
+            if (orders == null)
             {
                 return NotFound();
             }
 
-            return Json(history);
+            var ordersVM = new List<OrderHistoryVM>();
+            foreach (var order in orders)
+            {
+                var orderHistory = Mapper.Map<Order, OrderHistoryVM>(order);
+                orderHistory.CarTypeName = order.CarType.Name;
+                ordersVM.Add(orderHistory);
+            }
+
+            return Json(ordersVM);
         }
     }
 }

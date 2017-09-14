@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EvacuateMe.DAL
 {
-    public class MyLoggerProvider : ILoggerProvider
+    internal class MyLoggerProvider : ILoggerProvider
     {
         public ILogger CreateLogger(string categoryName)
         {

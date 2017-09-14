@@ -1,9 +1,5 @@
 ﻿using AutoMapper;
 using EvacuateMe.BLL.DTO;
-using EvacuateMe.BLL.DTO.Clients;
-using EvacuateMe.BLL.DTO.CompanyDTO;
-using EvacuateMe.BLL.DTO.Orders;
-using EvacuateMe.BLL.DTO.Workers;
 using EvacuateMe.DAL.Entities;
 using System;
 using System.Collections.Generic;
@@ -12,15 +8,12 @@ using System.Threading.Tasks;
 
 namespace EvacuateMe.BLL
 {
-    public class MappingProfile : Profile
+    internal class MappingProfile : Profile
     {
         public MappingProfile()
         {
-            CreateMap<Client, ClientSignUpDTO>();
-            CreateMap<ClientSignUpDTO, Client>();
-
-            CreateMap<Order, OrderClientDTO>();
-            CreateMap<OrderClientDTO, Order>();
+            CreateMap<Client, ClientRegisterDTO>();
+            CreateMap<ClientRegisterDTO, Client>();
 
             CreateMap<LocationDTO, WorkerLocationHistory>();
             CreateMap<WorkerLocationHistory, LocationDTO>();
@@ -34,23 +27,11 @@ namespace EvacuateMe.BLL
             CreateMap<Order, OrderCreateDTO>();
             CreateMap<OrderCreateDTO, Order>();
 
-            CreateMap<Order, CompletedOrderDTO>();
-            CreateMap<CompletedOrderDTO, Order>();
-
-            CreateMap<Order, OrderHistoryDTO>();
-            CreateMap<OrderHistoryDTO, Order>();
-
-            CreateMap<Company, CompanyDTO>();
-            CreateMap<CompanyDTO, Company>();
-
             CreateMap<Company, CompanyRegisterDTO>();
             CreateMap<CompanyRegisterDTO, Company>();
-
-            CreateMap<Worker, WorkerDTO>();
-            CreateMap<WorkerDTO, Worker>();
-
-            CreateMap<Worker, WorkerSignUpDTO>();
-            CreateMap<WorkerSignUpDTO, Worker>();
+           
+            CreateMap<Worker, WorkerRegisterDTO>();
+            CreateMap<WorkerRegisterDTO, Worker>();
         }
     }
 }

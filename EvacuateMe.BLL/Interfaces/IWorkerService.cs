@@ -1,6 +1,5 @@
 ﻿using EvacuateMe.BLL.BuisnessModels;
 using EvacuateMe.BLL.DTO;
-using EvacuateMe.BLL.DTO.Workers;
 using EvacuateMe.DAL.Entities;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace EvacuateMe.BLL.Interfaces
         Task<Worker> GetByApiKeyAsync(string apiKey);
         Task<bool> ChangeStatusAsync(Worker worker, int newStatus);
         Task<bool> ChangeLocationAsync(Worker worker, LocationDTO newLocation);
-        Task<OrderClientDTO> CheckForOrdersAsync(Worker worker);
-        Task SignUpAsync(WorkerSignUpDTO workerInfo, int companyId);
+        Task<Order> CheckForOrdersAsync(Worker worker);
+        Task SignUpAsync(WorkerRegisterDTO workerInfo, int companyId);
     }
 }

@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace EvacuateMe.DAL.Entities
 {
-    public enum WorkerStatus
+    public abstract class Entity
     {
-        Offline = 0,
-        Working = 1,
-        PerformingOrder = 2
+        [Key, Column("id")]
+        public virtual int Id { get; set; }
+
     }
 }

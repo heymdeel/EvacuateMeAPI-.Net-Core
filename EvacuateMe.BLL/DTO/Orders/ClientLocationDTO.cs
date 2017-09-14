@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text;
 
-namespace EvacuateMe.BLL.DTO.Orders
+namespace EvacuateMe.BLL.DTO
 {
     public class ClientLocationDTO
     {

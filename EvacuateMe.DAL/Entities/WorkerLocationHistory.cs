@@ -6,11 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("workers_location_history", Schema = "public")]
-    public class WorkerLocationHistory
-    {
-        [Key, Column("id")]
-        public int Id { get; set; }
-
+    public class WorkerLocationHistory : Entity
+    {        
         [Column("latitude")]
         public double Latitude { get; set; }
 

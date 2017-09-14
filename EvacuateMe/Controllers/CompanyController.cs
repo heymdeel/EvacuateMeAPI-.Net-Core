@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using EvacuateMe.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using EvacuateMe.BLL.DTO.CompanyDTO;
+using EvacuateMe.BLL.DTO;
+using AutoMapper;
+using EvacuateMe.DAL.Entities;
+using EvacuateMe.ViewModels;
 
 namespace EvacuateMe.Controllers
 {
@@ -23,8 +26,16 @@ namespace EvacuateMe.Controllers
         public async Task<IActionResult> Index()
         {
             var companies = await companyService.GetCompaniesAsync();
+            var result = new List<CompanyVM>();
 
-            return View(companies);
+            foreach (var company in companies)
+            {
+                var companyVM = Mapper.Map<Company, CompanyVM>(company);
+                companyVM.Rate = company.CountRate == 0 ? 0 : (double)company.SumRate / company.CountRate;
+                result.Add(companyVM);
+            }
+            
+            return View(result);
         }
 
         [HttpGet, Route("companies/add")]

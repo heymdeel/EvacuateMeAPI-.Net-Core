@@ -6,11 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("orders", Schema = "public")]
-    public class Order
-    {
-        [Key, Column("id")]
-        public int Id { get; set; }
-
+    public class Order : Entity
+    {        
         [Column("client"), ForeignKey("Client")]
         public int ClientId { get; set; }
 

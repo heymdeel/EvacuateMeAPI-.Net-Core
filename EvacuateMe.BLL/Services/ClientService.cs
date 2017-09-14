@@ -3,13 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using EvacuateMe.BLL.DTO;
-using EvacuateMe.DAL.Interfaces;
 using AutoMapper;
 using EvacuateMe.DAL.Entities;
 using System.Text.RegularExpressions;
 using System.Linq;
-using EvacuateMe.BLL.DTO.Clients;
 using System.Threading.Tasks;
+using EvacuateMe.DAL;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -32,10 +31,10 @@ namespace EvacuateMe.BLL.Services
 
         public bool ValidatePhone(string phone) => Regex.IsMatch(phone, "^[7-8][0-9]{10}$");
 
-        public async Task<string> SignUpAsync(ClientSignUpDTO clientData)
+        public async Task<string> SignUpAsync(ClientRegisterDTO clientData)
         {
             int code = clientData.Code;
-            Client client = Mapper.Map<ClientSignUpDTO, Client>(clientData);
+            Client client = Mapper.Map<ClientRegisterDTO, Client>(clientData);
 
             SMSCode sms = await db.SMSCodes.FirstOrDefaultAsync(s => s.Phone == client.Phone && s.Code == code);
             if (sms == null)

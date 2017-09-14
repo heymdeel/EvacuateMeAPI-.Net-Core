@@ -3,13 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using EvacuateMe.BLL.DTO;
-using EvacuateMe.DAL.Interfaces;
 using EvacuateMe.DAL.Entities;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using EvacuateMe.BLL.DTO.Orders;
 using EvacuateMe.BLL.BuisnessModels;
+using EvacuateMe.DAL;
 
 namespace EvacuateMe.BLL.Services
 {
@@ -18,11 +17,11 @@ namespace EvacuateMe.BLL.Services
         private readonly IUnitOfWork db;
         private readonly IMapService mapService;
 
-        private static Dictionary<OrderStatusEnum, List<OrderStatusEnum>> workerPermissions = new Dictionary<OrderStatusEnum, List<OrderStatusEnum>>()
+        private static Dictionary<BuisnessModels.OrderStatus, List<BuisnessModels.OrderStatus>> workerPermissions = new Dictionary<BuisnessModels.OrderStatus, List<BuisnessModels.OrderStatus>>()
                     {
-                        {OrderStatusEnum.Awaiting, new List<OrderStatusEnum>() { OrderStatusEnum.OnTheWay, OrderStatusEnum.CanceledByWorker }},
-                        {OrderStatusEnum.OnTheWay, new List<OrderStatusEnum>() { OrderStatusEnum.Performing, OrderStatusEnum.CanceledByWorker } },
-                        {OrderStatusEnum.Performing, new List<OrderStatusEnum>() { OrderStatusEnum.Completed } }
+                        {BuisnessModels.OrderStatus.Awaiting, new List<BuisnessModels.OrderStatus>() { BuisnessModels.OrderStatus.OnTheWay, BuisnessModels.OrderStatus.CanceledByWorker }},
+                        {BuisnessModels.OrderStatus.OnTheWay, new List<BuisnessModels.OrderStatus>() { BuisnessModels.OrderStatus.Performing, BuisnessModels.OrderStatus.CanceledByWorker } },
+                        {BuisnessModels.OrderStatus.Performing, new List<BuisnessModels.OrderStatus>() { BuisnessModels.OrderStatus.Completed } }
                     };
 
         public OrderService(IUnitOfWork db, IMapService mapService)
@@ -48,18 +47,17 @@ namespace EvacuateMe.BLL.Services
             return result.Count == 0 ? null : result;
         }
 
-        public async Task<OrderWorkerDTO> CreateOrderAsync(Client client, OrderCreateDTO orderInfo)
+        public async Task<Order> CreateOrderAsync(Client client, OrderCreateDTO orderInfo)
         {
             Company company = await db.Companies.FirstOrDefaultAsync(c => c.Id == orderInfo.CompanyId, include: c => c.Workers);
-            Worker worker = await db.Workers.FindByIdAsync(orderInfo.WorkerId);
+            Worker worker = await db.Workers.FirstOrDefaultAsync(w => w.Id == orderInfo.WorkerId, include: w => w.LastLocation);
 
             if (!ValidateCompany(company, worker))
             {
                 return null;
             }
 
-            var workerLocation = await db.WorkersLastLocation.FindByIdAsync(worker.Id);
-            if (workerLocation == null)
+            if (worker.LastLocation == null)
             {
                 return null;
             }
@@ -67,23 +65,15 @@ namespace EvacuateMe.BLL.Services
             var order = Mapper.Map<OrderCreateDTO, Order>(orderInfo);
 
             order.ClientId = client.Id;
-            order.StartWorkerLat = workerLocation.Latitude;
-            order.StartWorkerLong = workerLocation.Longitude;
+            order.StartWorkerLat = worker.LastLocation.Latitude;
+            order.StartWorkerLong = worker.LastLocation.Longitude;
             order.BeginingTime = DateTime.Now;
-            order.StatusId = (int)OrderStatusEnum.Awaiting;
+            order.StatusId = (int)BuisnessModels.OrderStatus.Awaiting;
             order.Rate = 0;
+            order.Worker = worker;
             await db.Orders.CreateAsync(order);
-
-            var response = new OrderWorkerDTO()
-            {
-                OrderId = order.Id,
-                Name = worker.Name,
-                Latitude = workerLocation.Latitude,
-                Longitude = workerLocation.Longitude,
-                Phone = worker.Phone
-            };
-
-            return response;
+            
+            return order;
         }
 
         public async Task<LocationDTO> GetWorkerLocationAsync(int orderId)
@@ -103,8 +93,8 @@ namespace EvacuateMe.BLL.Services
         {
             var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId, include: o => o.Worker);
 
-            if ((order.StatusId == (int)OrderStatusEnum.Awaiting || order.StatusId == (int)OrderStatusEnum.OnTheWay)
-                && newStatus == (int)OrderStatusEnum.CanceledByClient)
+            if ((order.StatusId == (int)BuisnessModels.OrderStatus.Awaiting || order.StatusId == (int)BuisnessModels.OrderStatus.OnTheWay)
+                && newStatus == (int)BuisnessModels.OrderStatus.CanceledByClient)
             {
                 order.StatusId = newStatus;
                 order.Worker.StatusId = (int)WorkerStatus.Offline;
@@ -126,14 +116,14 @@ namespace EvacuateMe.BLL.Services
             {
                 order.StatusId = newStatus;
 
-                if (newStatus == (int)OrderStatusEnum.OnTheWay || newStatus == (int)OrderStatusEnum.Performing)
+                if (newStatus == (int)BuisnessModels.OrderStatus.OnTheWay || newStatus == (int)BuisnessModels.OrderStatus.Performing)
                 {
                     order.Worker.StatusId = (int)WorkerStatus.PerformingOrder;
                 }
 
                 var company = await db.Companies.FindByIdAsync(order.Worker.CompanyId);
 
-                if (newStatus == (int)OrderStatusEnum.CanceledByWorker)
+                if (newStatus == (int)BuisnessModels.OrderStatus.CanceledByWorker)
                 {
                     order.Worker.StatusId = (int)WorkerStatus.Offline;
 
@@ -143,7 +133,7 @@ namespace EvacuateMe.BLL.Services
                     order.Rate = 1;
                 }
 
-                if (newStatus == (int)OrderStatusEnum.Completed)
+                if (newStatus == (int)BuisnessModels.OrderStatus.Completed)
                 {
                     order.Worker.StatusId = (int)WorkerStatus.Offline;
 
@@ -166,7 +156,7 @@ namespace EvacuateMe.BLL.Services
             return false;
         }
 
-        public async Task<OrderStatus> GetOrderStatusAsync(int orderId)
+        public async Task<DAL.Entities.OrderStatus> GetOrderStatusAsync(int orderId)
         {
             Order order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId, include: o => o.Status);
 
@@ -198,22 +188,19 @@ namespace EvacuateMe.BLL.Services
             return true;
         }
 
-        public async Task<CompletedOrderDTO> GetOrderInfoAsync(int orderId)
+        public async Task<Order> GetOrderInfoAsync(int orderId)
         {
             Order order = await db.Orders.FindByIdAsync(orderId);
 
-            if (order.StatusId != (int)OrderStatusEnum.Completed)
+            if (order.StatusId != (int)BuisnessModels.OrderStatus.Completed)
             {
                 return null;
             }
 
-            var orderInfo = Mapper.Map<Order, CompletedOrderDTO>(order);
-            orderInfo.Company = (await db.Companies.FirstOrDefaultAsync(c => c.Workers.Any(w => w.Id == order.WorkerId))).Name;
-
-            return orderInfo;
+            return order;
         }
 
-        public async Task<IEnumerable<OrderHistoryDTO>> GetClientHistoryAsync(Client client)
+        public async Task<IEnumerable<Order>> GetClientHistoryAsync(Client client)
         {
             var orders = await db.Orders.GetAsync(o => o.ClientId == client.Id, include: o => o.CarType);
 
@@ -221,18 +208,11 @@ namespace EvacuateMe.BLL.Services
             {
                 return null;
             }
-            var history = new List<OrderHistoryDTO>();
-            foreach (var order in orders)
-            {
-                var orderHistory = Mapper.Map<Order, OrderHistoryDTO>(order);
-                orderHistory.CarTypeName = order.CarType.Name;
-                history.Add(orderHistory);
-            }
 
-            return history;
+            return orders;
         }
 
-        public async Task<IEnumerable<OrderHistoryDTO>> GetWorkerHistoryAsync(Worker worker)
+        public async Task<IEnumerable<Order>> GetWorkerHistoryAsync(Worker worker)
         {
             var orders = await db.Orders.GetAsync(o => o.WorkerId == worker.Id, include: o => o.CarType);
 
@@ -240,15 +220,8 @@ namespace EvacuateMe.BLL.Services
             {
                 return null;
             }
-            var history = new List<OrderHistoryDTO>();
-            foreach (var order in orders)
-            {
-                var orderHistory = Mapper.Map<Order, OrderHistoryDTO>(order);
-                orderHistory.CarTypeName = order.CarType.Name;
-                history.Add(orderHistory);
-            }
 
-            return history;
+            return orders;
         }
 
         public async Task<bool> ClientInOrderAsync(int orderId, Client client)
@@ -285,7 +258,7 @@ namespace EvacuateMe.BLL.Services
                 return false;
             }
 
-            if (order.StatusId != (int)OrderStatusEnum.Completed ||
+            if (order.StatusId != (int)BuisnessModels.OrderStatus.Completed ||
                 (order.TerminationTime.AddDays(1) < DateTime.Now))
             {
                 return false;
@@ -296,17 +269,17 @@ namespace EvacuateMe.BLL.Services
 
         private bool StatusIsCorrect(int oldStatus, int newStatus)
         {
-            if (!Enum.IsDefined(typeof(OrderStatusEnum), newStatus))
+            if (!Enum.IsDefined(typeof(BuisnessModels.OrderStatus), newStatus))
             {
                 return false;
             }
 
-            if (!workerPermissions.ContainsKey((OrderStatusEnum)oldStatus))
+            if (!workerPermissions.ContainsKey((BuisnessModels.OrderStatus)oldStatus))
             {
                 return false;
             }
 
-            if (workerPermissions[(OrderStatusEnum)oldStatus].Contains((OrderStatusEnum)newStatus))
+            if (workerPermissions[(BuisnessModels.OrderStatus)oldStatus].Contains((BuisnessModels.OrderStatus)newStatus))
             {
                 return true;
             }

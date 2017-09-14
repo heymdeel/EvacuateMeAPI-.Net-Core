@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace EvacuateMe.BLL.DTO.CompanyDTO
+namespace EvacuateMe.BLL.DTO
 {
     public class CompanyRegisterDTO
     {

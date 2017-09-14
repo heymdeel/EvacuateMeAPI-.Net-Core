@@ -1,12 +1,13 @@
-﻿using System;
+﻿using EvacuateMe.DAL.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace EvacuateMe.DAL.Interfaces
+namespace EvacuateMe.DAL
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<T> where T : Entity
     {
         Task CreateAsync(T item);
         Task<T> FindByIdAsync(int id);

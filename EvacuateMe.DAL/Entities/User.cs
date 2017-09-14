@@ -7,11 +7,8 @@ using System.Text;
 namespace EvacuateMe.DAL.Entities
 {
     [Table("users", Schema = "public")]
-    public class User
-    {
-        [Key, Column("id")]
-        public int Id { get; set; }
-
+    public class User : Entity
+    {        
         [Column("company")]
         [ForeignKey("Company")]
         public int CompanyId { get; set; }

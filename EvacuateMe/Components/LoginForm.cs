@@ -16,11 +16,11 @@ namespace EvacuateMe.Components
             this.companyService = companyService;
         }
 
-        public async Task<IViewComponentResult> Invoke()
+        public IViewComponentResult Invoke()
         {
             if (User.IsInRole("company"))
             {
-                ViewData["name"] = await companyService.GetCompanyNameAsync(User.Identity.Name);
+                ViewData["name"] = Task.Run(async () => await companyService.GetCompanyNameAsync(User.Identity.Name)).Result;
             }
             else
             {

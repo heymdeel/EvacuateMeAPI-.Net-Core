@@ -11,8 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using EvacuateMe.BLL.Interfaces;
 using EvacuateMe.BLL.Services;
-using EvacuateMe.DAL.Interfaces;
-using EvacuateMe.DAL.Repostitories;
+using EvacuateMe.DAL;
 
 namespace EvacuateMe
 {
