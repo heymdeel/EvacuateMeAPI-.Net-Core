@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace EvacuateMe.DAL
 {
@@ -56,15 +57,7 @@ namespace EvacuateMe.DAL
             }
         }
 
-        public async Task<IEnumerable<T>> GetAsync()
-        {
-            using (var db = new L2DBContext())
-            {
-                return await db.GetTable<T>().ToListAsync();
-            }
-        }
-
-        public async Task<IEnumerable<T>> GetAsync(System.Linq.Expressions.Expression<Func<T, bool>> filter = null, System.Linq.Expressions.Expression<Func<T, T>> selector = null, int? page = null, int? size = null, System.Linq.Expressions.Expression<Func<T, object>> include = null)
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> filter = null, Expression<Func<T, T>> selector = null, int? page = null, int? size = null, Expression<Func<T, object>> include = null)
         {
             using (var db = new L2DBContext())
             {
@@ -96,6 +89,13 @@ namespace EvacuateMe.DAL
 
                 return await query.ToListAsync();
             }
+        }
+
+        public IQueryable<T> GetQueryable()
+        {
+            var db = new L2DBContext();
+
+            return db.GetTable<T>().AsQueryable();
         }
 
         public async Task RemoveAsync(T item)

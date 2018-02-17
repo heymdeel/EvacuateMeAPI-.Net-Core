@@ -9,9 +9,9 @@ namespace EvacuateMe.DAL
 {
     public interface IRepository<T> where T : Entity
     {
+        IQueryable<T> GetQueryable();
         Task CreateAsync(T item);
         Task<T> FindByIdAsync(int id);
-        Task<IEnumerable<T>> GetAsync();
         Task RemoveAsync(T item);
         Task UpdateAsync(T item);
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, Expression<Func<T, T>> selector = null, Expression<Func<T, object>> include = null);

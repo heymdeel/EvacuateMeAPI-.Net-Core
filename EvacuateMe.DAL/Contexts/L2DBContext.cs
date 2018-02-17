@@ -47,6 +47,11 @@ namespace EvacuateMe.DAL.Contexts
         {
             DefaultSettings = new MySettings();
             LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
+            TurnTraceSwitchOn();
+            WriteTraceLine = (s1, s2) =>
+            {
+                Console.WriteLine(s1, s2);
+            };
         }
 
         public L2DBContext() : base("Kek") { }

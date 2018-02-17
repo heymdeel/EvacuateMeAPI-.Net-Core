@@ -34,7 +34,7 @@ namespace EvacuateMe.BLL.Services
         public async Task<IEnumerable<OrderCompanyDTO>> GetListOfCompaniesAsync(ClientLocationDTO clientInfo)
         {
             List<OrderCompanyDTO> result = new List<OrderCompanyDTO>();
-
+            
             var sw = new Stopwatch();
             sw.Start();
             var companies = await db.Companies.GetAsync(c => c.Workers.Any(w => w.StatusId == (int)WorkerStatus.Working), include: c => c.Workers);
@@ -221,7 +221,7 @@ namespace EvacuateMe.BLL.Services
 
         public async Task<IEnumerable<Order>> GetWorkerHistoryAsync(Worker worker)
         {
-            var orders = await db.Orders.GetAsync(o => o.WorkerId == worker.Id, include: o => o.CarType);
+            var orders = await db.Orders.GetAsync(filter: o => o.WorkerId == worker.Id, include: o => o.CarType);
 
             if (orders == null || orders.Count() == 0)
             {

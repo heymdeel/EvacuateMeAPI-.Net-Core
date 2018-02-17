@@ -94,5 +94,10 @@ namespace EvacuateMe.DAL
             
             return await query.FirstOrDefaultAsync();
         }
+
+        public IQueryable<T> GetQueryable()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

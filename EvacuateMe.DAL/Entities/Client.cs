@@ -24,5 +24,20 @@ namespace EvacuateMe.DAL.Entities
 
         [Association(ThisKey = "Id", OtherKey = "ClientId")]
         public IEnumerable<Order> Orders { get; set; }
+
+        public Client()
+        {
+
+        }
+
+        public Client(Client client)
+        {
+            this.Id = client.Id;
+            this.Name = client.Name;
+            this.Phone = client.Phone;
+            this.ApiKey = client.ApiKey;
+            this.CarColour = client.CarColour;
+            this.CarModel = client.CarModel;
+        }
     }
 }
